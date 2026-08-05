@@ -189,6 +189,70 @@ class EventRegistry:
 
 event_registry = EventRegistry()
 
+# Optional durable sink (Phase 2). When a Postgres StateStore is active,
+# the process installs a sink here and every emitted event ALSO lands in
+# the durable per-run event log — that is what crosses the worker/API
+# process boundary via LISTEN/NOTIFY. The in-process registry stays for
+# memory-mode and same-process subscribers.
+_durable_sink: Any | None = None
+
+
+def set_durable_sink(sink: Any | None) -> None:
+    """Install (or clear) the process-wide durable event sink.
+
+    ``sink`` is called as ``sink(run_id, event_type, payload)`` and must
+    not block: use :class:`DurableEventWriter`.
+    """
+
+    global _durable_sink
+    _durable_sink = sink
+
+
+class DurableEventWriter:
+    """Order-preserving async writer from sync emit sites to a StateStore.
+
+    Emits enqueue synchronously; one drain task appends to the store
+    sequentially, so per-run sequence numbers are assigned in emit order
+    within this process.
+    """
+
+    def __init__(self, store: Any) -> None:
+        self._store = store
+        self._queue: asyncio.Queue[tuple[str, str, dict[str, Any]] | None] = (
+            asyncio.Queue()
+        )
+        self._task: asyncio.Task[None] | None = None
+
+    def start(self) -> None:
+        if self._task is None:
+            self._task = asyncio.get_running_loop().create_task(
+                self._drain(), name="durable-event-writer"
+            )
+
+    def emit(self, run_id: str, event_type: str, payload: dict[str, Any]) -> None:
+        self._queue.put_nowait((run_id, event_type, payload))
+
+    async def _drain(self) -> None:
+        while True:
+            item = await self._queue.get()
+            if item is None:
+                return
+            run_id, event_type, payload = item
+            try:
+                await self._store.append_event(
+                    run_id=run_id, event_type=event_type, payload=payload
+                )
+            except Exception:  # noqa: BLE001 — event log is best-effort here;
+                # the durable state machine never depends on it.
+                pass
+
+    async def aclose(self) -> None:
+        if self._task is None:
+            return
+        self._queue.put_nowait(None)
+        await self._task
+        self._task = None
+
 
 def emit_run_event(
     run_id: str,
@@ -199,9 +263,12 @@ def emit_run_event(
 ) -> SSEEvent:
     """Emit one event to the multiplexed channel for ``run_id``."""
 
-    return event_registry.emit(
+    event = event_registry.emit(
         channel_for_run(run_id),
         event_type,
         payload,
         event_id=event_id,
     )
+    if _durable_sink is not None:
+        _durable_sink(run_id, event_type, payload)
+    return event

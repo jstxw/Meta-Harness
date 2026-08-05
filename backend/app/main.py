@@ -17,8 +17,13 @@ from app.api import branches, checkpoints, events, forks, memory, runs
 from app.api.runs import cancel_active_runs
 from app.meta_harness.branches import cancel_all_branches
 from app.meta_harness.memory import memory_store as memory_store_cm
-from app.meta_harness.persistence import healthcheck, persistence_layer
-from app.streaming import StreamingRegistryError
+from app.meta_harness.persistence import get_dsn, healthcheck, persistence_layer
+from app.meta_harness.store import PostgresStateStore
+from app.streaming import (
+    DurableEventWriter,
+    StreamingRegistryError,
+    set_durable_sink,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -61,12 +66,25 @@ def create_app(
         app.state.persistence_backend = "memory"
         app.state.persistence_cm = None
         app.state.memory_store_cm = None
+        app.state.store = None
+        app.state.event_writer = None
 
         if _should_try_persistence(use_persistence) and await healthcheck():
             cm = persistence_layer()
             app.state.checkpointer = await cm.__aenter__()
             app.state.persistence_cm = cm
             app.state.persistence_backend = "postgres"
+            # Durable branch/event store (Phase 2). Workers run in
+            # separate processes; the API only creates rows, cancels
+            # them, and streams the durable event log.
+            store = await PostgresStateStore.connect(get_dsn())
+            await store.setup()
+            await store.reconcile_on_boot()
+            app.state.store = store
+            writer = DurableEventWriter(store)
+            writer.start()
+            set_durable_sink(writer.emit)
+            app.state.event_writer = writer
             # Best-effort memory store (same Postgres instance)
             try:
                 mem_cm = memory_store_cm()
@@ -80,6 +98,19 @@ def create_app(
         finally:
             await cancel_active_runs()
             await cancel_all_branches()
+            set_durable_sink(None)
+            writer = getattr(app.state, "event_writer", None)
+            if writer is not None:
+                try:
+                    await writer.aclose()
+                except Exception:  # noqa: BLE001
+                    pass
+            store = getattr(app.state, "store", None)
+            if store is not None:
+                try:
+                    await store.close()
+                except Exception:  # noqa: BLE001
+                    pass
             mem_cm = getattr(app.state, "memory_store_cm", None)
             if mem_cm is not None:
                 try:

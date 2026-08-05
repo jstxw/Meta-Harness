@@ -74,8 +74,22 @@ def write_manifest(run_dir: Path, **fields: Any) -> None:
 
 
 def append_evolution_summary(run_dir: Path, row: dict[str, Any]) -> None:
-    """Append one candidate row to evolution_summary.jsonl."""
+    """Append one candidate row to evolution_summary.jsonl.
+
+    Idempotent on ``(iteration, candidate)``: a crash between this append
+    and the LangGraph checkpoint write makes the node re-execute on
+    resume, and without the guard the same row would land twice
+    (invariant I1 — no double execution).
+    """
     path = run_dir / "evolution_summary.jsonl"
+    key = (row.get("iteration"), row.get("candidate"))
+    if path.exists():
+        for line in path.read_text().splitlines():
+            if not line.strip():
+                continue
+            existing = json.loads(line)
+            if (existing.get("iteration"), existing.get("candidate")) == key:
+                return
     with path.open("a") as f:
         f.write(json.dumps(row, default=str) + "\n")
 

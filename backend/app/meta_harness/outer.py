@@ -652,6 +652,38 @@ async def run_outer_loop(
     return final  # type: ignore[return-value]
 
 
+def build_runner_from_manifest(
+    *,
+    run_dir: Path,
+    repo_root: Path,
+    eval_tasks_dir: Path,
+    checkpointer: Any,
+    skill_path: Path | None = None,
+) -> OuterLoopRunner:
+    """Reconstruct a run's :class:`OuterLoopRunner` from its manifest.json.
+
+    Used by resume and by durable-branch workers, which must be able to
+    rebuild any run's graph from persistent state alone.
+    """
+    manifest_path = run_dir / "manifest.json"
+    if not manifest_path.exists():
+        raise FileNotFoundError(
+            f"manifest.json missing in {run_dir}; cannot rebuild run config"
+        )
+    manifest = json.loads(manifest_path.read_text())
+    return OuterLoopRunner(
+        run_dir=run_dir,
+        repo_root=repo_root,
+        eval_tasks_dir=eval_tasks_dir,
+        mock_proposer=manifest.get("mock_proposer", False),
+        mock_bench=manifest.get("mock_bench", False),
+        trials=manifest.get("trials", 5),
+        bench_workers=3,
+        skill_path=skill_path,
+        checkpointer=checkpointer,
+    )
+
+
 async def resume_outer_loop(
     *,
     run_dir: Path,
@@ -666,22 +698,12 @@ async def resume_outer_loop(
     (mock_proposer, mock_bench, trials, etc.) and resumes via
     ``graph.ainvoke(None, config={"thread_id": run_dir.name})``.
     """
-    manifest_path = run_dir / "manifest.json"
-    if not manifest_path.exists():
-        raise FileNotFoundError(
-            f"manifest.json missing in {run_dir}; cannot resume without run config"
-        )
-    manifest = json.loads(manifest_path.read_text())
-    runner = OuterLoopRunner(
+    runner = build_runner_from_manifest(
         run_dir=run_dir,
         repo_root=repo_root,
         eval_tasks_dir=eval_tasks_dir,
-        mock_proposer=manifest.get("mock_proposer", False),
-        mock_bench=manifest.get("mock_bench", False),
-        trials=manifest.get("trials", 5),
-        bench_workers=3,
-        skill_path=skill_path,
         checkpointer=checkpointer,
+        skill_path=skill_path,
     )
     graph = runner.build()
     # ``None`` input + existing thread_id → resume from last checkpoint.

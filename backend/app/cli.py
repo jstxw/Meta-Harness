@@ -69,6 +69,37 @@ def version() -> None:
 
 
 @app.command()
+def worker(
+    worker_id: str = typer.Option(None, help="Stable worker identity (default: host-pid)"),
+    lease_ttl: float = typer.Option(15.0, help="Branch lease TTL in seconds"),
+    poll_interval: float = typer.Option(0.5, help="Idle poll interval in seconds"),
+    max_branches: int = typer.Option(None, help="Exit after processing N branches"),
+    exit_when_idle: bool = typer.Option(
+        False, "--exit-when-idle", help="Exit once no claimable branch remains"
+    ),
+) -> None:
+    """Run a durable branch worker (separate process from the API).
+
+    Claims ``branch_runs`` rows with a fenced lease, executes each branch
+    against the shared Postgres checkpointer, and heartbeats while work
+    is in flight. Safe to run several at once; safe to kill -9.
+    """
+    from app.worker import run_worker
+
+    processed = _run_async(
+        run_worker(
+            worker_id=worker_id,
+            lease_ttl_s=lease_ttl,
+            poll_interval_s=poll_interval,
+            repo_root=REPO_ROOT,
+            max_branches=max_branches,
+            exit_when_idle=exit_when_idle,
+        )
+    )
+    typer.echo(f"processed {processed} branch(es)")
+
+
+@app.command()
 def inner(
     task: str = typer.Option(
         ...,

@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import uuid
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel, Field
 
 from app.api.runs import get_run_dir, get_run_graph
+from app.meta_harness import branches as br
 from app.meta_harness.branches import worktree_add
 from app.streaming import emit_run_event
 
@@ -38,6 +40,51 @@ async def fork_run(
     get_run_dir(request, run_id)
     graph = get_run_graph(request, run_id)
     parent_thread_id = payload.parent_thread_id or run_id
+    store = getattr(request.app.state, "store", None)
+
+    if store is not None:
+        # Durable path (Phase 2): persist a `created` branch row; a
+        # worker process claims and executes it. The API only validates
+        # the parent checkpoint and records intent.
+        try:
+            await br._find_snapshot(
+                graph,
+                thread_id=parent_thread_id,
+                checkpoint_id=payload.parent_checkpoint_id,
+            )
+        except KeyError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=str(exc),
+            ) from None
+        branch_id = uuid.uuid4().hex[:8]
+        thread_id = f"{parent_thread_id}.fork.{branch_id}"
+        row = await store.create_branch(
+            branch_id=branch_id,
+            run_id=run_id,
+            thread_id=thread_id,
+            parent_thread_id=parent_thread_id,
+            parent_checkpoint_id=payload.parent_checkpoint_id,
+            mods=payload.mods,
+            name=payload.name,
+        )
+        emit_run_event(
+            run_id,
+            "fork-created",
+            {
+                "thread_id": row.thread_id,
+                "parent_thread_id": row.parent_thread_id,
+                "parent_checkpoint_id": row.parent_checkpoint_id,
+                "mods_summary": _mods_summary(row.mods),
+            },
+        )
+        return {
+            "thread_id": row.thread_id,
+            "status": row.status,
+            "parent_checkpoint_id": row.parent_checkpoint_id,
+            "branch_id": row.branch_id,
+        }
+
     try:
         metadata, _task = await worktree_add(
             graph,
