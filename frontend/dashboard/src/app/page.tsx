@@ -203,13 +203,23 @@ export default function Home() {
   const handleEnter = async () => {
     if (entering) return;
     setEntering(true);
-    let target = live !== false && runs[0] ? `/runs/${runs[0].run_id}` : '/runs/demo-2026-04-25';
-    if (live === null) {
+    // No demo-run fallback: if the backend is down there is nothing to
+    // show, and pretending otherwise is exactly what this project
+    // stopped doing (REPOSITIONING_PLAN §4.0).
+    let target = live !== false && runs[0] ? `/runs/${runs[0].run_id}` : null;
+    if (live === null || target === null) {
       const ok = await isBackendAvailable();
       if (ok) {
         const latest = await listRuns().catch(() => []);
-        target = latest[0] ? `/runs/${latest[0].run_id}` : target;
+        if (latest[0]) target = `/runs/${latest[0].run_id}`;
+        else setLaunchError('backend is up but has no runs yet — launch a preset below');
+      } else {
+        setLaunchError('backend unreachable — start the API, then retry');
       }
+    }
+    if (!target) {
+      setEntering(false);
+      return;
     }
     setTimeout(() => router.push(target), 600);
   };

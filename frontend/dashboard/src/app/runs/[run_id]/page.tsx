@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { DashboardProvider, useDashboardDispatch } from '@/lib/state';
-import { startSSE, startMockSSE } from '@/lib/sse';
-import { fetchCheckpointCandidateMap, getRunDetail, isBackendAvailable, toRunInfo, toTreeNodesFromRunDetail } from '@/lib/api';
+import { startSSE } from '@/lib/sse';
+import { API_BASE_URL, fetchCheckpointCandidateMap, getRunDetail, isBackendAvailable, toRunInfo, toTreeNodesFromRunDetail } from '@/lib/api';
 import { TopBar } from '@/components/TopBar';
 import { TrajectoryTree } from '@/components/TrajectoryTree';
 import { DecisionLog } from '@/components/DecisionLog';
@@ -15,6 +15,8 @@ function DashboardShell() {
   const params = useParams<{ run_id: string }>();
   const runId = params.run_id;
   const dispatch = useDashboardDispatch();
+  const [backendDown, setBackendDown] = useState(false);
+  const [retryTick, setRetryTick] = useState(0);
   const latestDetailRef = useRef<Awaited<ReturnType<typeof getRunDetail>> | null>(null);
   const replayTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
@@ -78,35 +80,36 @@ function DashboardShell() {
 
   const connect = useCallback(async () => {
     const live = await isBackendAvailable();
-    dispatch({ type: 'SET_MODE', payload: live ? 'live' : 'mock' });
 
-    if (live) {
-      try {
-        const detail = await getRunDetail(runId);
-        latestDetailRef.current = detail;
-        const runInfo = toRunInfo(detail);
-        dispatch({ type: 'SET_RUN', payload: runInfo });
-        if (runInfo.isMock) dispatch({ type: 'SET_MODE', payload: 'mock' });
-        for (const node of toTreeNodesFromRunDetail(detail)) {
-          dispatch({ type: 'ADD_TREE_NODE', payload: node });
-        }
-        const checkpoints = await fetchCheckpointCandidateMap(runId);
-        for (const [candidate, checkpointId] of checkpoints) {
-          dispatch({ type: 'SET_CHECKPOINT_ID', payload: { candidate, checkpointId } });
-        }
-      } catch {
-        dispatch({ type: 'SET_SSE_CONNECTED', payload: false });
-        return undefined;
+    if (!live) {
+      // No fabricated demo run: a runtime whose claim is "watch state
+      // survive failure" must never invent a healthy run when nothing
+      // is behind it. Show the failure.
+      setBackendDown(true);
+      dispatch({ type: 'SET_SSE_CONNECTED', payload: false });
+      return undefined;
+    }
+
+    setBackendDown(false);
+    dispatch({ type: 'SET_MODE', payload: 'live' });
+    try {
+      const detail = await getRunDetail(runId);
+      latestDetailRef.current = detail;
+      const runInfo = toRunInfo(detail);
+      dispatch({ type: 'SET_RUN', payload: runInfo });
+      if (runInfo.isMock) dispatch({ type: 'SET_MODE', payload: 'mock' });
+      for (const node of toTreeNodesFromRunDetail(detail)) {
+        dispatch({ type: 'ADD_TREE_NODE', payload: node });
       }
-      return startSSE(runId, dispatch);
+      const checkpoints = await fetchCheckpointCandidateMap(runId);
+      for (const [candidate, checkpointId] of checkpoints) {
+        dispatch({ type: 'SET_CHECKPOINT_ID', payload: { candidate, checkpointId } });
+      }
+    } catch {
+      dispatch({ type: 'SET_SSE_CONNECTED', payload: false });
+      return undefined;
     }
-
-    if (runId === 'demo-2026-04-25') {
-      return startMockSSE(dispatch);
-    }
-
-    dispatch({ type: 'SET_SSE_CONNECTED', payload: false });
-    return undefined;
+    return startSSE(runId, dispatch);
   }, [runId, dispatch]);
 
   useEffect(() => {
@@ -116,7 +119,29 @@ function DashboardShell() {
       cleanup?.();
       clearReplayTimers();
     };
-  }, [clearReplayTimers, connect]);
+  }, [clearReplayTimers, connect, retryTick]);
+
+  if (backendDown) {
+    return (
+      <div className="h-full flex flex-col items-center justify-center gap-4 bg-panel">
+        <span className="text-[11px] font-semibold text-amber uppercase tracking-[3px]">
+          backend disconnected
+        </span>
+        <p className="max-w-md text-center text-[11px] leading-relaxed text-text-mid">
+          No backend is reachable at {API_BASE_URL}. Nothing is shown because
+          nothing is running — this dashboard does not fabricate demo data.
+          Start the API (`uv run uvicorn app.main:app`) and a worker
+          (`uv run meta-harness worker`), then retry.
+        </p>
+        <button
+          onClick={() => setRetryTick(t => t + 1)}
+          className="text-[10px] text-cyan uppercase tracking-wide border border-border px-3 py-1.5 rounded hover:text-text-hi hover:border-cyan/40 transition-colors"
+        >
+          Retry connection
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col bg-panel overflow-hidden">

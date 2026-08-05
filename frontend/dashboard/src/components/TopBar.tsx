@@ -46,7 +46,13 @@ export function TopBar({ onReplay }: { onReplay?: () => void }) {
         )}
         {run && (
           <span className="text-[10px] text-text-mid uppercase tracking-wide">
-            {run.isMock ? 'mock run' : mode} · {run.status} · iter {run.iteration}
+            {run.isMock ? (
+              <span className="text-amber" title="Scores follow a hardcoded mock-bench fixture curve — not measurements">
+                fixture (mock-bench)
+              </span>
+            ) : (
+              mode
+            )} · {run.status} · iter {run.iteration}
           </span>
         )}
         {profile && (
