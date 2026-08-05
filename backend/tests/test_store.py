@@ -79,6 +79,9 @@ async def store_ctx(request, postgres_available):
     await store._conn.execute(
         "DELETE FROM run_event_seq WHERE run_id LIKE %s;", (f"{run_prefix}%",)
     )
+    await store._conn.execute(
+        "DELETE FROM workers WHERE worker_id LIKE %s;", (f"{run_prefix}%",)
+    )
     await store.close()
 
 
@@ -292,6 +295,32 @@ async def test_i7_event_seq_monotonic_and_gapless(store_ctx, request):
 
     tail = await store.list_events(run_id=run_id, after_seq=20)
     assert [e.seq for e in tail] == [21, 22, 23, 24, 25]
+
+
+async def test_worker_registry_lifecycle(store_ctx, request):
+    store, clock, expire = store_ctx
+    run_id = _run_id(request)
+    worker_id = f"{run_id}-worker"
+
+    registered = await store.register_worker(
+        worker_id=worker_id, pid=4242, hostname="host-a"
+    )
+    assert registered.pid == 4242
+
+    await expire(0.0)  # let time pass so last_seen visibly moves
+    await store.touch_worker(worker_id)
+    touched = await store.get_worker(worker_id)
+    assert touched.last_seen >= registered.last_seen
+
+    # Re-register (restart with same identity) updates pid, keeps row.
+    rereg = await store.register_worker(
+        worker_id=worker_id, pid=4243, hostname="host-a"
+    )
+    assert rereg.pid == 4243
+    assert any(w.worker_id == worker_id for w in await store.list_workers())
+
+    await store.remove_worker(worker_id)
+    assert await store.get_worker(worker_id) is None
 
 
 async def test_i7_event_seq_gapless_under_concurrent_appends(store_ctx, request):

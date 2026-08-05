@@ -6,6 +6,7 @@ import { ScoreChart } from './ScoreChart';
 import { DiffViewer } from './DiffViewer';
 import { TestOutput } from './TestOutput';
 import { MemoryPanel } from './MemoryPanel';
+import { ChaosPanel } from './ChaosPanel';
 import { getDiff, getTestOutput } from '@/lib/api';
 
 export function ContextPanel() {
@@ -15,7 +16,7 @@ export function ContextPanel() {
   const [diffResult, setDiffResult] = useState<{ candidate: string; value: string | null } | null>(null);
   const [testResult, setTestResult] = useState<{ candidate: string; value: string | null } | null>(null);
 
-  const tabs = ['chart', 'diff', 'test', 'memory'] as const;
+  const tabs = ['chart', 'diff', 'test', 'memory', 'chaos'] as const;
   const selected = selectedNode ?? tree.find(n => n.status === 'best')?.candidate ?? tree[0]?.candidate ?? null;
   const selectedTreeNode = tree.find(n => n.candidate === selected) ?? null;
   const diff = diffResult?.candidate === selected ? diffResult.value : null;
@@ -122,6 +123,8 @@ export function ContextPanel() {
         )}
 
         {contextTab === 'memory' && <MemoryPanel />}
+
+        {contextTab === 'chaos' && <ChaosPanel />}
       </div>
     </div>
   );

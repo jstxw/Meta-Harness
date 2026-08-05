@@ -53,6 +53,30 @@ def default_worker_id() -> str:
     return f"{socket.gethostname()}-{os.getpid()}"
 
 
+def _emit_lifecycle(row: BranchRow, node: str, **extra: Any) -> None:
+    """Best-effort branch-lifecycle event (closed set: `state-update`).
+
+    This is what makes the chaos demo legible: claim/requeue/finish
+    events carry the fence generation, so a reclaim after kill -9 is
+    visible as gen N → N+1 over SSE.
+    """
+    try:
+        streaming.emit_run_event(
+            row.run_id,
+            "state-update",
+            {
+                "thread_id": row.thread_id,
+                "node": node,
+                "branch_id": row.branch_id,
+                "fence": row.lease_generation,
+                "branch_status": row.status,
+                **extra,
+            },
+        )
+    except Exception:  # noqa: BLE001 — narrative only, never blocks work
+        pass
+
+
 def _make_recorder(store: StateStore, row: BranchRow):
     """Fenced exactly-once iteration recorder bound to one claim."""
     fence = row.lease_generation
@@ -216,6 +240,9 @@ async def run_worker(
 
     processed = 0
     try:
+        await store.register_worker(
+            worker_id=worker_id, pid=os.getpid(), hostname=socket.gethostname()
+        )
         async with persistence_layer() as saver:
             requeued = await store.reconcile_on_boot()
             for row in requeued:
@@ -224,6 +251,7 @@ async def run_worker(
                     f"{row.branch_id} (gen {row.lease_generation}) → requeued",
                     flush=True,
                 )
+                _emit_lifecycle(row, "branch-requeued", reconciled_by=worker_id)
 
             runners: dict[str, tuple[Any, Any]] = {}
             while max_branches is None or processed < max_branches:
@@ -231,6 +259,7 @@ async def run_worker(
                     worker_id=worker_id, lease_ttl_s=lease_ttl_s
                 )
                 if row is None:
+                    await store.touch_worker(worker_id)
                     if exit_when_idle:
                         break
                     await asyncio.sleep(poll_interval_s)
@@ -241,6 +270,8 @@ async def run_worker(
                     f"(run {row.run_id}, fence {row.lease_generation})",
                     flush=True,
                 )
+                await store.touch_worker(worker_id)
+                _emit_lifecycle(row, "branch-claimed", worker=worker_id)
                 if row.run_id not in runners:
                     runner = build_runner_from_manifest(
                         run_dir=runs_root / row.run_id,
@@ -262,7 +293,11 @@ async def run_worker(
                     f"{final.status if final else 'unknown'}",
                     flush=True,
                 )
+                if final is not None:
+                    _emit_lifecycle(final, "branch-finished", worker=worker_id)
     finally:
+        with contextlib.suppress(Exception):
+            await store.remove_worker(worker_id)
         streaming.set_durable_sink(None)
         with contextlib.suppress(Exception):
             await writer.aclose()

@@ -101,6 +101,26 @@ class BranchRow:
         }
 
 
+@dataclass
+class WorkerRow:
+    """One registered worker process (chaos/observability surface)."""
+
+    worker_id: str
+    pid: int
+    hostname: str
+    started_at: float
+    last_seen: float
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "worker_id": self.worker_id,
+            "pid": self.pid,
+            "hostname": self.hostname,
+            "started_at": _iso(self.started_at),
+            "last_seen": _iso(self.last_seen),
+        }
+
+
 @dataclass(frozen=True)
 class StoredEvent:
     """One durable per-run event with a gap-free monotonic sequence (I7)."""
@@ -168,6 +188,19 @@ class StateStore(Protocol):
 
     async def reconcile_on_boot(self) -> list[BranchRow]: ...
 
+    # ── worker registry (chaos/observability) ────────────────────────
+    async def register_worker(
+        self, *, worker_id: str, pid: int, hostname: str
+    ) -> WorkerRow: ...
+
+    async def touch_worker(self, worker_id: str) -> None: ...
+
+    async def remove_worker(self, worker_id: str) -> None: ...
+
+    async def list_workers(self) -> list[WorkerRow]: ...
+
+    async def get_worker(self, worker_id: str) -> WorkerRow | None: ...
+
     # ── authoritative iteration log (I1) ─────────────────────────────
     async def record_iteration(
         self,
@@ -209,6 +242,7 @@ class InMemoryStateStore:
         self._clock = clock or time.time
         self._branches: dict[str, BranchRow] = {}
         self._iterations: dict[str, dict[tuple[int, str], dict[str, Any]]] = {}
+        self._workers: dict[str, WorkerRow] = {}
         self._events: dict[str, list[StoredEvent]] = {}
         self._event_waiters: dict[str, list[asyncio.Event]] = {}
         self._create_counter = 0  # tiebreak FIFO when clock is frozen
@@ -359,6 +393,35 @@ class InMemoryStateStore:
                 affected.append(_copy_row(row))
         return affected
 
+    async def register_worker(
+        self, *, worker_id: str, pid: int, hostname: str
+    ) -> WorkerRow:
+        now = self._now()
+        existing = self._workers.get(worker_id)
+        row = WorkerRow(
+            worker_id=worker_id,
+            pid=pid,
+            hostname=hostname,
+            started_at=existing.started_at if existing else now,
+            last_seen=now,
+        )
+        self._workers[worker_id] = row
+        return row
+
+    async def touch_worker(self, worker_id: str) -> None:
+        row = self._workers.get(worker_id)
+        if row is not None:
+            row.last_seen = self._now()
+
+    async def remove_worker(self, worker_id: str) -> None:
+        self._workers.pop(worker_id, None)
+
+    async def list_workers(self) -> list[WorkerRow]:
+        return sorted(self._workers.values(), key=lambda w: w.started_at)
+
+    async def get_worker(self, worker_id: str) -> WorkerRow | None:
+        return self._workers.get(worker_id)
+
     async def record_iteration(
         self,
         *,
@@ -493,6 +556,14 @@ CREATE INDEX IF NOT EXISTS branch_runs_run_id_idx
 CREATE TABLE IF NOT EXISTS run_event_seq (
     run_id   TEXT PRIMARY KEY,
     last_seq BIGINT NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS workers (
+    worker_id  TEXT PRIMARY KEY,
+    pid        BIGINT NOT NULL,
+    hostname   TEXT NOT NULL,
+    started_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    last_seen  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS iteration_log (
@@ -723,6 +794,55 @@ class PostgresStateStore:
             """
         )
         return [self._row(r) for r in await cur.fetchall()]
+
+    async def register_worker(
+        self, *, worker_id: str, pid: int, hostname: str
+    ) -> WorkerRow:
+        cur = await self._conn.execute(
+            """
+            INSERT INTO workers (worker_id, pid, hostname)
+            VALUES (%s, %s, %s)
+            ON CONFLICT (worker_id) DO UPDATE
+                SET pid = EXCLUDED.pid,
+                    hostname = EXCLUDED.hostname,
+                    last_seen = now()
+            RETURNING *;
+            """,
+            (worker_id, pid, hostname),
+        )
+        return self._worker_row(await cur.fetchone())
+
+    async def touch_worker(self, worker_id: str) -> None:
+        await self._conn.execute(
+            "UPDATE workers SET last_seen = now() WHERE worker_id = %s;",
+            (worker_id,),
+        )
+
+    async def remove_worker(self, worker_id: str) -> None:
+        await self._conn.execute(
+            "DELETE FROM workers WHERE worker_id = %s;", (worker_id,)
+        )
+
+    async def list_workers(self) -> list[WorkerRow]:
+        cur = await self._conn.execute("SELECT * FROM workers ORDER BY started_at;")
+        return [self._worker_row(r) for r in await cur.fetchall()]
+
+    async def get_worker(self, worker_id: str) -> WorkerRow | None:
+        cur = await self._conn.execute(
+            "SELECT * FROM workers WHERE worker_id = %s;", (worker_id,)
+        )
+        record = await cur.fetchone()
+        return self._worker_row(record) if record else None
+
+    @staticmethod
+    def _worker_row(record: dict[str, Any]) -> WorkerRow:
+        return WorkerRow(
+            worker_id=record["worker_id"],
+            pid=record["pid"],
+            hostname=record["hostname"],
+            started_at=record["started_at"].timestamp(),
+            last_seen=record["last_seen"].timestamp(),
+        )
 
     async def record_iteration(
         self,

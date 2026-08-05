@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app import __version__
-from app.api import branches, checkpoints, events, forks, memory, runs
+from app.api import branches, checkpoints, debug, events, forks, memory, runs
 from app.api.runs import cancel_active_runs
 from app.meta_harness.branches import cancel_all_branches
 from app.meta_harness.memory import memory_store as memory_store_cm
@@ -157,6 +157,7 @@ def create_app(
     app.include_router(branches.router)
     app.include_router(events.router)
     app.include_router(memory.router)
+    app.include_router(debug.router)
     return app
 
 

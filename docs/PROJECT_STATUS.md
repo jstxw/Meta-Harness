@@ -66,7 +66,7 @@ one complete mock-bench loop observed end to end.
 | 1 | `docs/INVARIANTS.md` spec, tests named after invariants | ✅ Complete |
 | 2 | Durable branches: `StateStore`, `branch_runs`, leases + fencing tokens, boot reconciliation, worker/API split, LISTEN/NOTIFY SSE | ✅ Complete — exit criterion verified by `tests/test_worker_recovery.py`: worker SIGKILLed mid-branch, second worker reclaims with fence 2, no duplicate iterations |
 | 3 | Deterministic simulation testing (`backend/sim/`) + Hypothesis stateful | ✅ Complete — `uv run python -m sim.run --seeds 10000` → 0 failures; two real bugs found and documented with seeds (DST-1 seed 7, DST-2 seed 9270 — see `docs/INVARIANTS.md`) |
-| 4 | Observability frontend (4.0 honesty fixes → 4.1 chaos button → 4.2 seed replay) | 4.0 ✅ Complete: demo-run fallback deleted (explicit disconnected state instead), `getDiff`/`getTestOutput` verified already wired, mock-bench runs labeled "fixture (mock-bench)" in the TopBar, no token axis ships anywhere. 4.1–4.5 not started |
+| 4 | Observability frontend (4.0 honesty fixes → 4.1 chaos button → 4.2 seed replay) | 4.0 ✅ Complete (demo-run fallback deleted, explicit disconnected state, fixtures labeled). 4.1 ✅ Complete: `POST /debug/kill-worker/{id}` gated by `META_HARNESS_CHAOS=1`, worker registry in the store, "chaos" dashboard tab with per-worker kill -9 buttons, live branch-lease view (status, owner, lease countdown, **fence generation badge**) and a fence-increment log — kill a worker, watch gen N → N+1 as another claims. 4.3 ✅ (folded into the same panel). 4.2 (seed replay viewer), 4.4 (fork UI existed pre-plan), 4.5 (gated on Phase 5) remain |
 | 5 | wasmtime sandbox (gated; Docker-per-trial fallback) | Not started |
 
 Notes vs. the plan:

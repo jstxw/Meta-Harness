@@ -15,7 +15,7 @@ export type LogTag =
   | "fork"
   | "memory";
 
-export type ContextTab = "chart" | "diff" | "test" | "memory";
+export type ContextTab = "chart" | "diff" | "test" | "memory" | "chaos";
 
 export type LogFilter = "all" | "tools" | "verify" | "scores" | "forks";
 

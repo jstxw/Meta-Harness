@@ -315,4 +315,60 @@ export async function getTestOutput(runId: string, candidate: string): Promise<s
   return typeof data.output === "string" && data.output.length > 0 ? data.output : null;
 }
 
+// ── Branch lifecycle + chaos (Phase 4.1/4.3) ──
+
+export type BranchInfo = {
+  branch_id: string;
+  run_id: string;
+  thread_id: string;
+  parent_thread_id: string | null;
+  parent_checkpoint_id: string | null;
+  status: "created" | "running" | "completed" | "failed" | "cancelled";
+  name: string | null;
+  error: string | null;
+  lease_owner: string | null;
+  lease_generation: number;
+  lease_expires_at: string | null;
+  created_at: string | null;
+  started_at: string | null;
+  finished_at: string | null;
+};
+
+export async function listBranches(runId: string): Promise<BranchInfo[]> {
+  const res = await fetch(`${BASE_URL}/runs/${encodeURIComponent(runId)}/branches`);
+  if (!res.ok) return [];
+  const data = await res.json();
+  return Array.isArray(data.branches) ? (data.branches as BranchInfo[]) : [];
+}
+
+export type WorkerInfo = {
+  worker_id: string;
+  pid: number;
+  hostname: string;
+  started_at: string | null;
+  last_seen: string | null;
+  local: boolean;
+  alive: boolean | null;
+};
+
+export async function listWorkers(): Promise<{ chaosEnabled: boolean; workers: WorkerInfo[] }> {
+  const res = await fetch(`${BASE_URL}/debug/workers`);
+  if (!res.ok) return { chaosEnabled: false, workers: [] };
+  const data = await res.json();
+  return {
+    chaosEnabled: Boolean(data.chaos_enabled),
+    workers: Array.isArray(data.workers) ? (data.workers as WorkerInfo[]) : [],
+  };
+}
+
+export async function killWorker(workerId: string): Promise<{ ok: boolean; detail: string }> {
+  const res = await fetch(
+    `${BASE_URL}/debug/kill-worker/${encodeURIComponent(workerId)}`,
+    { method: "POST" },
+  );
+  const data = await res.json().catch(() => ({}));
+  if (res.ok) return { ok: true, detail: `SIGKILL sent to pid ${data.pid}` };
+  return { ok: false, detail: typeof data.detail === "string" ? data.detail : `kill failed (${res.status})` };
+}
+
 export const API_BASE_URL = BASE_URL;
