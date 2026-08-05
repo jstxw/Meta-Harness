@@ -103,6 +103,11 @@ class OuterLoopRunner:
         self.skill_path = skill_path
         self.checkpointer = checkpointer
         self.memory_store = memory_store
+        # Optional fenced exactly-once iteration recorder (Phase 2/3).
+        # Durable-branch workers set this per claim; it raises
+        # StaleFenceError when the worker no longer owns its branch, so
+        # a reclaimed worker aborts BEFORE the non-idempotent append.
+        self.iteration_recorder: Any = None
 
     # ── propose ───────────────────────────────────────────────────────
 
@@ -511,6 +516,8 @@ class OuterLoopRunner:
             "tokens": (candidate["scores"] or {}).get("avg_tokens", 0),
             "cost_usd": candidate.get("cost_usd") or 0.0,
         }
+        if self.iteration_recorder is not None:
+            await self.iteration_recorder(row)
         runs_mod.append_evolution_summary(self.run_dir, row)
 
         new_best = candidate["name"] if accepted else prev_best

@@ -63,10 +63,10 @@ one complete mock-bench loop observed end to end.
 | Phase | What | Status |
 |---|---|---|
 | 0 | Unblock: Postgres up, suite green, mock-bench loop runs | ✅ Complete (evidence above) |
-| 1 | `docs/INVARIANTS.md` spec, tests named after invariants | In progress |
-| 2 | Durable branches: `StateStore`, `branch_runs`, leases + fencing tokens, boot reconciliation, worker/API split, LISTEN/NOTIFY SSE | Not started |
-| 3 | Deterministic simulation testing (`backend/sim/`) + Hypothesis stateful | Not started |
-| 4 | Observability frontend (4.0 honesty fixes → 4.1 chaos button → 4.2 seed replay) | Not started |
+| 1 | `docs/INVARIANTS.md` spec, tests named after invariants | ✅ Complete |
+| 2 | Durable branches: `StateStore`, `branch_runs`, leases + fencing tokens, boot reconciliation, worker/API split, LISTEN/NOTIFY SSE | ✅ Complete — exit criterion verified by `tests/test_worker_recovery.py`: worker SIGKILLed mid-branch, second worker reclaims with fence 2, no duplicate iterations |
+| 3 | Deterministic simulation testing (`backend/sim/`) + Hypothesis stateful | ✅ Complete — `uv run python -m sim.run --seeds 10000` → 0 failures; two real bugs found and documented with seeds (DST-1 seed 7, DST-2 seed 9270 — see `docs/INVARIANTS.md`) |
+| 4 | Observability frontend (4.0 honesty fixes → 4.1 chaos button → 4.2 seed replay) | 4.0 in progress |
 | 5 | wasmtime sandbox (gated; Docker-per-trial fallback) | Not started |
 
 Notes vs. the plan:

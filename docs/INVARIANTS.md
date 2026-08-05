@@ -32,6 +32,7 @@ created → running → completed
                   → cancelled
 created → cancelled
 running → running        (lease reclaimed after expiry — only with a NEW fence)
+running → created        (boot reconciliation requeues an expired-lease orphan)
 ```
 
 Terminal states: `completed`, `failed`, `cancelled`. A terminal row never
@@ -87,6 +88,56 @@ Existing tests that already assert an invariant are named for it:
 | I6 | `backend/tests/test_branches.py::test_cancel_branch_marks_running_task_cancelled` (in-process half of I6; the durable half lands with Phase 2) |
 | I7 | `backend/tests/test_streaming.py` (closed event set; sequence numbers land with Phase 2's LISTEN/NOTIFY fanout) |
 
-I2 and I5 have no tests yet — they require the Phase 2 `branch_runs`
-table (leases, fences, boot reconciliation) to exist at all. The Phase 3
-simulator asserts I1–I7 after every seeded run.
+I2 and I5 are covered by the `StateStore` contract tests in
+`backend/tests/test_store.py` (both implementations) and continuously by
+the simulator. The kill-9 end-to-end test in
+`backend/tests/test_worker_recovery.py` covers I1/I3/I5 against real
+worker processes. The Phase 3 simulator (`backend/sim/`) asserts I1–I7
+after every seeded run:
+
+```bash
+cd backend && uv run python -m sim.run --seeds 10000        # 0 failures
+cd backend && uv run python -m sim.run --seed 7 --mode unfenced_file -v   # replay a found bug
+```
+
+---
+
+## Bugs found by deterministic simulation
+
+Both are reproducible from their seed; the seed fully determines the
+schedule, faults, and interleaving.
+
+### DST-1 — double append past a stale fence (`unfenced_file`, seed 7)
+
+The historical protocol appended iteration rows to
+`evolution_summary.jsonl` with a read-check but **no fence at the data
+layer**. Interleaving found at seed 7 (also 22, 46, 69 …):
+
+1. Worker A passes the dedupe read-check for iteration *k*.
+2. A stalls past lease expiry (GC pause / suspend). Worker B reclaims
+   the branch with a new fence and re-executes iteration *k* — check,
+   append.
+3. A wakes and its next scheduled step is the append — its heartbeat
+   task, which would have detected the stale fence, hasn't fired yet.
+   Duplicate row: **I1 violated.**
+
+**Fix (shipped):** `StateStore.record_iteration` — an atomic,
+fence-guarded, exactly-once record (`INSERT … WHERE fence valid … ON
+CONFLICT DO NOTHING` in Postgres). The worker's iteration recorder runs
+before the file append; a reclaimed worker gets `StaleFenceError` from
+the data layer itself. 10,000 seeds pass with this protocol; the file is
+a best-effort projection.
+
+### DST-2 — zombie checkpoint write after completion (seed 9270)
+
+LangGraph checkpoint writes are **not** fence-guarded. A stalled
+worker that wakes after the rightful owner completed the branch can
+append one stale trailing checkpoint to the branch thread's history.
+
+Impact assessment (why this is documented rather than "fixed"): a
+terminal branch is never resumed (I6), so nothing reads the stale
+checkpoint; a *requeued* branch resuming from a stale checkpoint
+re-executes iterations idempotently — the fenced record dedupes — and
+converges (I3). The residual effect is thread-history pollution bounded
+to one in-flight write. A full fix would require fencing inside the
+checkpointer itself.

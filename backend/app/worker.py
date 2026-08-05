@@ -53,6 +53,23 @@ def default_worker_id() -> str:
     return f"{socket.gethostname()}-{os.getpid()}"
 
 
+def _make_recorder(store: StateStore, row: BranchRow):
+    """Fenced exactly-once iteration recorder bound to one claim."""
+    fence = row.lease_generation
+
+    async def record(iteration_row: dict[str, Any]) -> bool:
+        return await store.record_iteration(
+            run_id=row.run_id,
+            iteration=iteration_row["iteration"],
+            candidate=iteration_row["candidate"],
+            row=iteration_row,
+            branch_id=row.branch_id,
+            fence=fence,
+        )
+
+    return record
+
+
 async def prepare_branch_config(graph: Any, row: BranchRow) -> dict[str, Any]:
     """Return the config to ``ainvoke(None, …)`` for a claimed branch.
 
@@ -131,6 +148,10 @@ async def execute_claimed_branch(
             result = exec_task.result()
         except asyncio.CancelledError:
             raise
+        except StaleFenceError:
+            # The fenced iteration recorder fired mid-execution: the
+            # branch was reclaimed or cancelled. Abort without writing.
+            return
         except Exception as exc:  # noqa: BLE001 — workload failure is data
             await store.finish_branch(
                 branch_id=row.branch_id,
@@ -204,7 +225,7 @@ async def run_worker(
                     flush=True,
                 )
 
-            graphs: dict[str, Any] = {}
+            runners: dict[str, tuple[Any, Any]] = {}
             while max_branches is None or processed < max_branches:
                 row = await store.claim_next_branch(
                     worker_id=worker_id, lease_ttl_s=lease_ttl_s
@@ -220,17 +241,20 @@ async def run_worker(
                     f"(run {row.run_id}, fence {row.lease_generation})",
                     flush=True,
                 )
-                if row.run_id not in graphs:
+                if row.run_id not in runners:
                     runner = build_runner_from_manifest(
                         run_dir=runs_root / row.run_id,
                         repo_root=repo_root,
                         eval_tasks_dir=eval_tasks_dir,
                         checkpointer=saver,
                     )
-                    graphs[row.run_id] = runner.build()
+                    runners[row.run_id] = (runner, runner.build())
+                runner, graph = runners[row.run_id]
+                runner.iteration_recorder = _make_recorder(store, row)
                 await execute_claimed_branch(
-                    store, graphs[row.run_id], row, lease_ttl_s=lease_ttl_s
+                    store, graph, row, lease_ttl_s=lease_ttl_s
                 )
+                runner.iteration_recorder = None
                 processed += 1
                 final = await store.get_branch(row.branch_id)
                 print(

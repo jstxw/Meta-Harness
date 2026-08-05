@@ -168,6 +168,20 @@ class StateStore(Protocol):
 
     async def reconcile_on_boot(self) -> list[BranchRow]: ...
 
+    # ── authoritative iteration log (I1) ─────────────────────────────
+    async def record_iteration(
+        self,
+        *,
+        run_id: str,
+        iteration: int,
+        candidate: str,
+        row: dict[str, Any],
+        branch_id: str | None = None,
+        fence: int | None = None,
+    ) -> bool: ...
+
+    async def list_iterations(self, *, run_id: str) -> list[dict[str, Any]]: ...
+
     # ── per-run event log (I7) ───────────────────────────────────────
     async def append_event(
         self, *, run_id: str, event_type: str, payload: dict[str, Any]
@@ -194,6 +208,7 @@ class InMemoryStateStore:
     def __init__(self, *, clock: Callable[[], float] | None = None) -> None:
         self._clock = clock or time.time
         self._branches: dict[str, BranchRow] = {}
+        self._iterations: dict[str, dict[tuple[int, str], dict[str, Any]]] = {}
         self._events: dict[str, list[StoredEvent]] = {}
         self._event_waiters: dict[str, list[asyncio.Event]] = {}
         self._create_counter = 0  # tiebreak FIFO when clock is frozen
@@ -344,6 +359,46 @@ class InMemoryStateStore:
                 affected.append(_copy_row(row))
         return affected
 
+    async def record_iteration(
+        self,
+        *,
+        run_id: str,
+        iteration: int,
+        candidate: str,
+        row: dict[str, Any],
+        branch_id: str | None = None,
+        fence: int | None = None,
+    ) -> bool:
+        """Atomically record one iteration exactly once (I1).
+
+        With ``branch_id``/``fence``, the write is fence-guarded: a
+        stalled worker whose lease was reclaimed gets
+        :class:`StaleFenceError` *from the data layer itself* — the file
+        append it would otherwise race on can't protect itself.
+        Returns ``True`` if newly recorded, ``False`` if the
+        (iteration, candidate) key already exists.
+        """
+        if branch_id is not None:
+            branch = self._branches.get(branch_id)
+            if branch is None:
+                raise UnknownBranchError(branch_id)
+            if branch.status != "running" or branch.lease_generation != fence:
+                raise StaleFenceError(
+                    f"branch {branch_id}: record_iteration fence {fence} is "
+                    f"stale (status={branch.status}, "
+                    f"generation={branch.lease_generation})"
+                )
+        log = self._iterations.setdefault(run_id, {})
+        key = (iteration, candidate)
+        if key in log:
+            return False
+        log[key] = dict(row)
+        return True
+
+    async def list_iterations(self, *, run_id: str) -> list[dict[str, Any]]:
+        log = self._iterations.get(run_id, {})
+        return [dict(log[k]) for k in sorted(log)]
+
     async def append_event(
         self, *, run_id: str, event_type: str, payload: dict[str, Any]
     ) -> StoredEvent:
@@ -438,6 +493,15 @@ CREATE INDEX IF NOT EXISTS branch_runs_run_id_idx
 CREATE TABLE IF NOT EXISTS run_event_seq (
     run_id   TEXT PRIMARY KEY,
     last_seq BIGINT NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS iteration_log (
+    run_id    TEXT NOT NULL,
+    iteration BIGINT NOT NULL,
+    candidate TEXT NOT NULL,
+    row       JSONB NOT NULL,
+    ts        TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (run_id, iteration, candidate)
 );
 
 CREATE TABLE IF NOT EXISTS run_events (
@@ -659,6 +723,81 @@ class PostgresStateStore:
             """
         )
         return [self._row(r) for r in await cur.fetchall()]
+
+    async def record_iteration(
+        self,
+        *,
+        run_id: str,
+        iteration: int,
+        candidate: str,
+        row: dict[str, Any],
+        branch_id: str | None = None,
+        fence: int | None = None,
+    ) -> bool:
+        if branch_id is not None:
+            # Fence check and insert in ONE statement: the insert only
+            # happens while the fence is provably current, and the
+            # primary key makes the record exactly-once (I1).
+            cur = await self._conn.execute(
+                """
+                INSERT INTO iteration_log (run_id, iteration, candidate, row)
+                SELECT %(run_id)s, %(iteration)s, %(candidate)s, %(row)s
+                WHERE EXISTS (
+                    SELECT 1 FROM branch_runs
+                    WHERE branch_id = %(branch_id)s
+                      AND status = 'running'
+                      AND lease_generation = %(fence)s
+                )
+                ON CONFLICT (run_id, iteration, candidate) DO NOTHING;
+                """,
+                {
+                    "run_id": run_id,
+                    "iteration": iteration,
+                    "candidate": candidate,
+                    "row": Json(row),
+                    "branch_id": branch_id,
+                    "fence": fence,
+                },
+            )
+            if cur.rowcount == 1:
+                return True
+            # Nothing inserted: either duplicate key or stale fence —
+            # disambiguate so a reclaimed worker aborts loudly.
+            check = await self._conn.execute(
+                """
+                SELECT 1 FROM branch_runs
+                WHERE branch_id = %s AND status = 'running'
+                  AND lease_generation = %s;
+                """,
+                (branch_id, fence),
+            )
+            if await check.fetchone() is None:
+                raise StaleFenceError(
+                    f"branch {branch_id}: record_iteration fence {fence} is "
+                    "stale — lease reclaimed or branch cancelled; abort"
+                )
+            return False
+
+        cur = await self._conn.execute(
+            """
+            INSERT INTO iteration_log (run_id, iteration, candidate, row)
+            VALUES (%s, %s, %s, %s)
+            ON CONFLICT (run_id, iteration, candidate) DO NOTHING;
+            """,
+            (run_id, iteration, candidate, Json(row)),
+        )
+        return cur.rowcount == 1
+
+    async def list_iterations(self, *, run_id: str) -> list[dict[str, Any]]:
+        cur = await self._conn.execute(
+            """
+            SELECT row FROM iteration_log
+            WHERE run_id = %s
+            ORDER BY iteration, candidate;
+            """,
+            (run_id,),
+        )
+        return [r["row"] for r in await cur.fetchall()]
 
     async def append_event(
         self, *, run_id: str, event_type: str, payload: dict[str, Any]
