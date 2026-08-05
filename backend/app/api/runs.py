@@ -581,6 +581,72 @@ async def create_run(
     return _run_info_from_record(record)
 
 
+@router.post("/runs/{run_id}/resume", status_code=status.HTTP_202_ACCEPTED)
+async def resume_run(run_id: str, request: Request) -> dict[str, Any]:
+    """Resume a run from its last durable checkpoint.
+
+    Idempotent (I1): if the run is already executing, this is a no-op
+    that returns current status — never a second execution.
+    """
+    record = run_registry.get(run_id)
+    if record is not None and record.task is not None and not record.task.done():
+        return {**_run_info_from_record(record), "resumed": False}
+
+    run_dir = get_run_dir(request, run_id)
+    manifest = _read_manifest(run_dir)
+    if manifest is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="run manifest not found; cannot resume",
+        )
+    checkpointer = _app_checkpointer(request)
+    if checkpointer is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="resume requires the Postgres checkpointer",
+        )
+
+    repo_root = _repo_root(request)
+    skill_raw = manifest.get("skill_path")
+    skill_path = Path(skill_raw) if skill_raw else None
+    graph = _build_graph(
+        run_dir=run_dir,
+        repo_root=repo_root,
+        eval_tasks_dir=_eval_tasks_dir(request),
+        mock_proposer=bool(manifest.get("mock_proposer", False)),
+        mock_bench=bool(manifest.get("mock_bench", False)),
+        trials=int(manifest.get("trials", 5)),
+        workers=int(manifest.get("workers", 3)),
+        skill_path=skill_path,
+        checkpointer=checkpointer,
+        memory_store=_app_memory_store(request),
+    )
+    record = RunRecord(
+        run_id=run_id,
+        thread_id=manifest.get("thread_id", run_id),
+        status="running",
+        started_at=manifest.get("started_at", _now()),
+        domain=manifest.get("domain", "coding-agent"),
+        skill_path=skill_raw,
+        budget=int(manifest.get("budget", 0)),
+        model=manifest.get("model", "opus"),
+        current_iteration=int(manifest.get("current_iteration", 0)),
+        run_dir=run_dir,
+        graph=graph,
+        checkpointer=checkpointer,
+    )
+    _write_manifest_status(run_dir, status="running")
+    # ``None`` input + existing thread_id → LangGraph resumes from the
+    # last checkpoint; a completed thread returns its final state
+    # without re-executing any node.
+    record.task = asyncio.create_task(
+        _execute_run(record, None),
+        name=f"resume:{run_id}",
+    )
+    run_registry[run_id] = record
+    return {**_run_info_from_record(record), "resumed": True}
+
+
 @router.get("/runs")
 async def list_runs(request: Request) -> dict[str, Any]:
     runs_root = _repo_root(request) / "runs"

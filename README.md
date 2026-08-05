@@ -111,6 +111,29 @@ never presented as measurements.
 
 ---
 
+## Consume it as a service (MCP)
+
+The runtime is exposed to any MCP client as six tools (`start_run`,
+`fork_from_checkpoint`, `get_branch_status`, `list_branches`,
+`cancel_branch`, `resume_run`) via a thin stdio adapter over the REST
+API — one implementation of the branch lifecycle, no parallel logic.
+`.mcp.json` registers it for Claude Code; or manually:
+
+```bash
+claude mcp add meta-harness -- uv --directory backend run meta-harness-mcp
+```
+
+The acceptance scenario — an MCP client with no knowledge of this repo
+starts a run, forks a mid-point checkpoint, the owning worker is
+`kill -9`'d, and the client's next poll shows the branch running again
+with an incremented `lease_generation` — is automated:
+
+```bash
+cd backend && uv run pytest tests/test_mcp_acceptance.py -q   # 1 passed
+```
+
+---
+
 ## What's distinctive about this implementation
 
 1. **Durability is the product, not a feature flag.** Branch lifecycle,

@@ -32,6 +32,7 @@ def _mods_summary(mods: dict[str, Any]) -> dict[str, Any]:
 
 
 @router.post("/runs/{run_id}/fork", status_code=status.HTTP_202_ACCEPTED)
+@router.post("/runs/{run_id}/branches", status_code=status.HTTP_202_ACCEPTED)
 async def fork_run(
     run_id: str,
     payload: ForkRequest,

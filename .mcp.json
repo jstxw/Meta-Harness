@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "meta-harness": {
+      "command": "uv",
+      "args": ["--directory", "backend", "run", "meta-harness-mcp"],
+      "env": {
+        "META_HARNESS_API_URL": "http://localhost:8000"
+      }
+    }
+  }
+}
