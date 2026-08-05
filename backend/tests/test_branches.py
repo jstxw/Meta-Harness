@@ -25,16 +25,7 @@ from app.meta_harness.branches import (  # noqa: E402
     reconstruct_trajectory,
     worktree_add,
 )
-from app.meta_harness.persistence import healthcheck, persistence_layer  # noqa: E402
-
-
-def async_test(fn):
-    """Run an async test body without relying on pytest-asyncio."""
-
-    def _run():
-        return asyncio.run(fn())
-
-    return _run
+from app.meta_harness.persistence import persistence_layer  # noqa: E402
 
 
 class BranchTestState(TypedDict, total=False):
@@ -101,7 +92,6 @@ def _clean_branch_state():
     clear_branch_state()
 
 
-@async_test
 async def test_get_state_history_projects_checkpoints():
     graph = _build_graph()
     await _run_parent(graph, thread_id="history-root", budget=2)
@@ -116,7 +106,6 @@ async def test_get_state_history_projects_checkpoints():
     assert history[0].values_summary["budget_remaining"] == 0
 
 
-@async_test
 async def test_worktree_add_creates_branch_and_applies_mods():
     graph = _build_graph()
     parent_thread_id = "fork-root"
@@ -173,7 +162,6 @@ async def test_worktree_add_creates_branch_and_applies_mods():
     ]
 
 
-@async_test
 async def test_two_branches_run_concurrently():
     graph = _build_graph()
     parent_thread_id = "concurrent-root"
@@ -207,7 +195,6 @@ async def test_two_branches_run_concurrently():
     assert second.status == "completed"
 
 
-@async_test
 async def test_cancel_branch_marks_running_task_cancelled():
     graph = _build_graph()
     parent_thread_id = "cancel-root"
@@ -231,16 +218,7 @@ async def test_cancel_branch_marks_running_task_cancelled():
     assert task.cancelled()
 
 
-_PG_OK = asyncio.get_event_loop_policy().new_event_loop().run_until_complete(
-    healthcheck()
-)
-
-
-@pytest.mark.skipif(
-    not _PG_OK,
-    reason="Postgres not reachable at configured DSN; bring up via docker compose",
-)
-@async_test
+@pytest.mark.usefixtures("require_postgres")
 async def test_two_branches_complete_with_shared_async_postgres_saver():
     graph_id = f"pg-branches-{int(time.time() * 1000)}"
     async with persistence_layer() as saver:

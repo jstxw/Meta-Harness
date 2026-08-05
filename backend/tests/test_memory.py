@@ -8,7 +8,6 @@ DSN. Bring it up with::
 
 from __future__ import annotations
 
-import asyncio
 import sys
 from pathlib import Path
 
@@ -25,14 +24,8 @@ from app.meta_harness.memory import (  # noqa: E402
     memory_store,
     search_patterns,
 )
-from app.meta_harness.persistence import healthcheck  # noqa: E402
 
-_PG_OK = asyncio.get_event_loop_policy().new_event_loop().run_until_complete(healthcheck())
-
-pytestmark = pytest.mark.skipif(
-    not _PG_OK,
-    reason="Postgres not reachable at configured DSN; bring up via docker compose",
-)
+pytestmark = pytest.mark.usefixtures("require_postgres")
 
 
 # ── basic CRUD ───────────────────────────────────────────────────────

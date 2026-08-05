@@ -1,241 +1,140 @@
 # Project Status — Meta-Harness
 
-> Last updated: 2026-04-26
+> Last updated: 2026-08-05 (macOS workspace, `durable-runtime` branch)
 
-Meta-Harness is a LangGraph-native substrate for self-improving coding agent harnesses, implementing the Stanford Meta-Harness paradigm. This document tracks what has been accomplished and what remains.
+**Framing:** this project is a *durable execution runtime for long-horizon
+agent workflows* — checkpointed, forkable, crash-recoverable — verified by
+deterministic simulation testing. The self-improving harness search is the
+reference workload that stresses the runtime, not the thesis. See
+`documents/REPOSITIONING_PLAN.md` for the full plan and
+`docs/INVARIANTS.md` for the spec the runtime is verified against.
+
+Every number in this file is reproducible by the command printed next to it.
 
 ---
 
-## Current Workspace Snapshot
+## Verified snapshot (2026-08-05)
 
-As of 2026-04-26, the codebase has the intended frontend/backend integration
-points in place, but the current local workspace should not be treated as fully
-green.
+Environment: macOS (Darwin), Python via `uv`, Postgres 16 in Docker.
 
-- The dashboard is wired to the backend through `NEXT_PUBLIC_API_BASE_URL`,
-  defaulting to `http://localhost:8000`.
-- The frontend calls the FastAPI REST API for health, run listing, run detail,
-  checkpoints, forks, and memory.
-- Live updates are wired through SSE via `GET /runs/{run_id}/stream`.
-- The backend exposes the matching FastAPI routers and has CORS enabled for the
-  local Next.js dev origin (`http://localhost:3000`).
-- The dashboard still has mock/demo fallback behavior for the demo run when the
-  backend is unavailable.
-- Candidate diff and test-output panels are not yet backed by real API
-  endpoints; the frontend helpers currently return `null` for those views.
-
-Latest local verification attempt:
-
-```powershell
-cd backend
-uv run pytest tests -q
+```bash
+docker compose -f infra/docker-compose.yml up -d postgres
+cd backend && uv run pytest tests -q
 ```
 
-`uv` was not available on PATH in this shell, so verification was retried with
-the existing virtual environment:
+Result: **92 passed, 1 skipped in ~6s.**
 
-```powershell
-cd backend
-..\.venv\Scripts\python -m pytest tests -q
+The single skip is `tests/test_inner.py` (live-LLM smoke test) when
+`ANTHROPIC_API_KEY` is not set. All Postgres-backed tests (checkpointing,
+memory, forks) **execute** — they no longer skip, and no test performs a
+module-import-time healthcheck (replaced by the session-scoped
+`postgres_available` fixture in `backend/tests/conftest.py`).
+
+```bash
+cd backend && uv run meta-harness loop --proposer mock --mock-bench --budget 2 --fresh
 ```
 
-Result: **31 passed, 21 skipped, 3 failed, 31 errors** in the current Windows
-workspace. The failures/errors are mostly environment and platform related:
-pytest could not read/create some temp and cache directories, some tests assume
-Unix-style `/tmp` paths, and `pytest-asyncio` was not detected by the active
-environment. Frontend build/lint/type checks were not rerun during this
-snapshot.
+Result: completes in seconds with `"iterations_completed": 2`,
+`"persistent": true`, and an `evolution_summary.jsonl` with no duplicate
+iteration numbers:
+
+```bash
+cat runs/<run>/evolution_summary.jsonl | jq -r .iteration | sort | uniq -d   # empty
+```
+
+**Phase 0 exit criteria met:** suite green with Postgres tests executing,
+one complete mock-bench loop observed end to end.
 
 ---
 
-## Build Progress
+## Known synthetic values (do not present as results)
 
-| Step | Name | Status | Tests |
-|------|------|--------|-------|
-| 1 | Repo skeleton + Postgres + first eval task | ✅ Complete | — |
-| 2 | Sandbox + 6 fixed tools | ✅ Complete | 20 tests |
-| 3 | Inner StateGraph end-to-end (real LLM) | ✅ Complete | 1 test (requires API key) |
-| 4 | Five eval tasks + multi-trial scoring | ✅ Complete | — |
-| 5 | Outer loop: propose → validate → benchmark → update_frontier | ✅ Complete | 1 test |
-| 6 | Claude CLI proposer + SKILL.md | ✅ Complete | — |
-| 7 | AsyncPostgresSaver checkpointing | ✅ Complete | 4 tests |
-| 8 | Cross-run memory (PostgresStore) | ✅ Complete | 15 tests |
-| 9 | Time-travel: history + fork + concurrent branches | ✅ Complete | 5 tests |
-| 10 | FastAPI REST + SSE with closed-set registry | ✅ Complete | 4 tests |
-| 11 | Frontend dashboard + visualizations | ✅ Complete | 7 Playwright tests |
-| 12 | CLI completeness + holdout evaluation | ✅ Complete | CLI tests + 2 holdout tasks |
-| 13 | End-to-end demo dry-run (acceptance) | ❌ Not started | — |
-
-**Overall: 12 of 13 steps complete.**
+- Mock-bench accuracy is `min(0.95, 0.60 + 0.20 * (iteration - 1))` — a
+  deterministic fixture, useful for testing, meaningless as a measurement.
+  The old "62% → 85%" demo arc derives from this constant and must not be
+  quoted as a result anywhere.
+- Real-bench path writes literal zeros for `tokens` and `cost_usd`.
+- `MemoryPanel.tsx` contains hardcoded fixture patterns.
 
 ---
 
-## What's Been Built
+## Phase status (per `documents/REPOSITIONING_PLAN.md`)
 
-### Core Engine (Steps 1–8)
+| Phase | What | Status |
+|---|---|---|
+| 0 | Unblock: Postgres up, suite green, mock-bench loop runs | ✅ Complete (evidence above) |
+| 1 | `docs/INVARIANTS.md` spec, tests named after invariants | In progress |
+| 2 | Durable branches: `StateStore`, `branch_runs`, leases + fencing tokens, boot reconciliation, worker/API split, LISTEN/NOTIFY SSE | Not started |
+| 3 | Deterministic simulation testing (`backend/sim/`) + Hypothesis stateful | Not started |
+| 4 | Observability frontend (4.0 honesty fixes → 4.1 chaos button → 4.2 seed replay) | Not started |
+| 5 | wasmtime sandbox (gated; Docker-per-trial fallback) | Not started |
 
-- **`backend/app/meta_harness/`** — the full backend orchestration layer:
-  - `state.py` — `MetaHarnessState`, `CodingAgentState`, `Candidate` TypedDicts
-  - `harness.py` — `CodingAgentHarness` base class with 11 override points
-  - `inner.py` — 5-phase inner state machine (orient → plan → act → verify → submit)
-  - `outer.py` — 4-node outer loop (propose → validate → benchmark → update_frontier) with SSE emit hooks and memory integration
-  - `tools.py` — 6 fixed tools: `read_file`, `write_file`, `apply_patch`, `run_bash`, `grep_search`, `task_complete`
-  - `sandbox.py` — process-isolated sandboxes under `/tmp/meta-harness-task-{uuid}/`
-  - `proposer.py` — Claude CLI subprocess proposer + mock proposer for testing
-  - `frontier.py` — Pareto frontier computation with `dominated_by_names`
-  - `persistence.py` — `AsyncPostgresSaver` with connection pooling (`max_size=20`)
-  - `memory.py` — `AsyncPostgresStore` wrapper for cross-run learned patterns
-  - `branches.py` — branch registry, `worktree_add`, `cancel_branch`, checkpoint history
-  - `runs.py` — run directory management, manifest/artifact writing
+Notes vs. the plan:
 
-### REST API (Step 10)
-
-- **`backend/app/api/`** — FastAPI routers:
-  - `runs.py` — `POST /runs` (201 + Location), `GET /runs`, `GET /runs/{id}`
-  - `checkpoints.py` — `GET /runs/{id}/checkpoints`, `GET /runs/{id}/checkpoints/{ckpt_id}`
-  - `forks.py` — `POST /runs/{id}/fork`, branch listing, cancellation, trajectory
-  - `memory.py` — `GET /memory/{namespace}`, `POST /memory/{namespace}/search`
-  - `events.py` — `GET /runs/{id}/stream` (SSE)
-- **`backend/app/streaming.py`** — closed-set SSE event registry with 11 registered event types
-- **`backend/app/main.py`** — FastAPI app factory
-
-### CLI
-
-- **`backend/app/cli.py`** — Typer CLI with subcommands:
-  - `meta-harness version`
-  - `meta-harness inner --task <id> --candidate <name>`
-  - `meta-harness benchmark --candidate <name> --trials N`
-  - `meta-harness loop --proposer {claude|mock} --budget N [--mock-bench] [--fresh]`
-  - `meta-harness resume <run-name>`
-  - `meta-harness memory list [--namespace <domain>]`
-
-### Eval Tasks
-
-- 5 search-set tasks in `eval/tasks/`:
-  - `task-001-fix-typo` — bug-fix (typo in calculator)
-  - `task-002-add-function` — implement a spec
-  - `task-003-refactor` — restructure code
-  - `task-004-handle-error` — robustness (error handling)
-  - `task-005-implement-spec` — multi-file implementation
-
-### Infrastructure
-
-- **Postgres 16** via `infra/docker-compose.yml`
-- **`.env` / `.env.example`** — `POSTGRES_DSN`, `ANTHROPIC_API_KEY`
-- **`agents/baseline.py`** — the starting harness that all candidates derive from
-- **`skills/meta-harness-coding-agent/SKILL.md`** — proposer system prompt with 11 override points
-
-### Test Suite
-
-Historical project status listed the backend suite as **82 passed, 1 skipped**
-via `cd backend && uv run pytest tests -q`, with frontend e2e coverage passing
-through **7 Playwright tests**.
-
-Current workspace verification on 2026-04-26 did **not** reproduce that green
-state. `uv` was not available on PATH, and the fallback command
-`cd backend && ..\.venv\Scripts\python -m pytest tests -q` reported **31 passed,
-21 skipped, 3 failed, 31 errors**. Treat the suite as currently blocked by
-local environment/platform issues until the Windows temp/cache permissions,
-`pytest-asyncio` availability, and `/tmp` path assumptions are resolved.
+- The plan's Phase 0 "move to WSL2" item is moot — this workspace is macOS,
+  so the Unix `/tmp` assumptions hold natively. The 2026-04-26 Windows
+  failure report (31 passed / 21 skipped / 3 failed / 31 errors) does not
+  reproduce here and is superseded by the snapshot above.
+- `asyncio_mode = "auto"` was already set in `backend/pyproject.toml`; the
+  hand-rolled `async_test` decorators in `test_streaming.py` and
+  `test_branches.py` have been deleted.
 
 ---
 
-## What Remains
+## Component triage (what is core vs. workload)
 
-### Step 11 — Frontend Dashboard + Visualizations
-
-> **Priority: HIGH** — this is the visual payoff of the entire system.
-
-**Status:** Complete. The dashboard lives in `frontend/dashboard/`.
-
-**Delivered:**
-- Next.js 16 app at `localhost:3000`
-- Run-detail page with 5 live-updating views:
-  1. **ReactFlow** outer-state-graph (propose/validate/benchmark/update_frontier nodes light up)
-  2. **D3 trajectory tree** showing branch lineage from `reconstruct_trajectory`
-  3. **Monaco unified-diff viewer** for candidate code changes
-  4. **Score + frontier chart** (accuracy over iterations, Pareto frontier)
-  5. **Memory panel** showing cross-run learned patterns
-- Right-click → fork modal (calls `POST /runs/{id}/fork`)
-- SSE-driven live updates via `GET /runs/{id}/stream`
-
-**Backend integration points ready:**
-- All REST endpoints exist (step 10)
-- SSE streaming with 11 event types works
-- Branch orchestration and trajectory reconstruction available
-- Memory search and listing available
+- **Core (the product):** `AsyncPostgresSaver` checkpointing,
+  `branches.py` fork semantics, `resume_outer_loop`, SSE streaming, the D3
+  trajectory tree (observability UI).
+- **Workload (still works, not the claim):** `proposer.py`, the 11
+  override points, `SKILL.md`, the Pareto frontier, the 5 search + 2
+  holdout eval tasks.
+- **Known durability gaps (Phase 2 targets):** branch registry is
+  in-process `dict`s in `branches.py` — lost on restart; `EventRegistry`
+  is in-process — breaks the moment worker and API are separate processes;
+  no leases, no fencing, no boot reconciliation.
 
 ---
 
-### Step 12 — CLI Completeness + Holdout Evaluation
-
-> **Priority: MEDIUM** — the CLI is complete enough for the current build
-> order and covered by deterministic smoke tests.
-
-**Status:** Complete. `loop`, `inner`, `benchmark`, `fork`, `init`, `resume`,
-and `memory` subcommands are implemented; `--holdout` support writes
-`holdout-result.json` for real-bench loops; two holdout tasks are present
-under `eval/holdout/`; CLI coverage lives in `backend/tests/test_cli.py`.
-
----
-
-### Step 13 — End-to-End Demo Dry-Run (Acceptance)
-
-> **Priority: HIGH** — this is the final acceptance gate.
-
-**What's missing:**
-- [ ] `scripts/demo_dryrun.sh` — exercises the full demo command from `DEFINITION_OF_DONE.md`
-- [ ] Score arc calibration: accuracy should land within ±5% of expected
-- [ ] Fork branches should reach ≥0.83 accuracy
-- [ ] Total runtime < 8 min, cost < $5
-- [ ] Requires `ANTHROPIC_API_KEY` for real Claude proposer runs
-
----
-
-## Known Issues
+## Known issues
 
 | Issue | Severity | Notes |
 |-------|----------|-------|
-| Postgres healthcheck changed in s9 (uses `AsyncConnection.connect` directly) | Low | Works but causes some test processes to skip Postgres-dependent tests when the event loop policy differs |
-| Mock module caching across tests | Fixed | `test_api.py` now cleans `sys.path` and `sys.modules`; `outer.py` invalidates caches before importing |
-| SSE `_emit` was not best-effort | Fixed | Wrapped in `try/except` to prevent streaming errors from crashing graph nodes |
-| `tokens` / `cost_usd` are zero in real-bench results | Medium | Token aggregation from Anthropic responses is not implemented yet |
-| Memory panel still includes demo fixtures | Low | Live memory SSE entries are visible, but historical memory list is partly mocked |
-| Backend suite not green in current Windows workspace | High | Latest fallback run: 31 passed, 21 skipped, 3 failed, 31 errors; primary causes are temp/cache permissions, missing pytest-asyncio detection, and Unix `/tmp` assumptions |
-| Frontend candidate diff/test output are placeholders | Medium | `getDiff()` and `getTestOutput()` currently return `null`; real candidate diff/test-output endpoints are not wired yet |
+| Branch registry/metadata in-process only | High | The core Phase 2 gap: forks do not survive a restart |
+| `tokens` / `cost_usd` are zero in real-bench results | Low (demoted) | Real token accounting is explicitly optional in the repositioning plan |
+| Memory panel includes demo fixtures | Medium | Phase 4.0: wire to real store or remove |
+| Dashboard falls back to a mock demo run when backend is unreachable | High (honesty) | Phase 4.0: replace with an explicit disconnected state |
+| Frontend `getDiff()` / `getTestOutput()` return `null` | Medium | Backend endpoints exist and are asserted in `backend/tests/test_api.py`; wire the client |
 
 ---
 
-## Architecture Reference
+## Architecture reference
 
 ```
-MetaHarness/
-├── agents/              # Candidate harness modules (baseline + generated)
+meta_harness/
+├── agents/               # Candidate harness modules (baseline + generated)
 ├── backend/
 │   ├── app/
-│   │   ├── api/         # FastAPI REST routers (step 10)
-│   │   ├── meta_harness/ # Core engine (steps 1-9)
-│   │   ├── cli.py       # Typer CLI
-│   │   ├── main.py      # FastAPI app factory
-│   │   └── streaming.py # SSE event registry
-│   └── tests/           # pytest suite
-├── eval/
-│   ├── tasks/           # 5 search-set tasks
-│   ├── holdout/         # 2 held-out tasks
-│   └── score.py         # pytest-based scoring
-├── frontend/            # Next.js dashboard
-├── infra/               # docker-compose.yml (Postgres 16)
-├── sdk/                 # Public SDK package
-├── skills/              # SKILL.md (proposer system prompt)
-└── docs/                # Architecture, interfaces, build order
+│   │   ├── api/          # FastAPI REST routers
+│   │   ├── meta_harness/ # Core engine (outer/inner loops, branches, persistence)
+│   │   ├── cli.py        # Typer CLI
+│   │   ├── main.py       # FastAPI app factory
+│   │   └── streaming.py  # SSE event registry (closed set of 11 event types)
+│   └── tests/            # pytest suite (asyncio_mode = "auto")
+├── eval/                 # 5 search tasks + 2 holdout tasks + scorer
+├── frontend/             # Next.js dashboard
+├── infra/                # docker-compose.yml (Postgres 16)
+├── documents/            # REPOSITIONING_PLAN.md — the active plan
+└── docs/                 # INVARIANTS.md (spec), historical design docs
 ```
 
 ---
 
-## Key Documents
+## Key documents
 
-- [BUILD_ORDER.md](BUILD_ORDER.md) — 13-step topological build plan
-- [INTERFACES.md](INTERFACES.md) — state schemas, API contracts, SSE event types
-- [STEP_9_HANDOFF.md](STEP_9_HANDOFF.md) — branch orchestration specifics
-- [PROJECT_LAYOUT.md](PROJECT_LAYOUT.md) — directory structure and naming
-- [TEAM_HANDOFF.md](TEAM_HANDOFF.md) — onboarding and context for new developers
+- [`documents/REPOSITIONING_PLAN.md`](../documents/REPOSITIONING_PLAN.md) — the active plan; read first
+- [`docs/INVARIANTS.md`](INVARIANTS.md) — invariants I1–I7 the runtime is tested against
+- [`docs/INTERFACES.md`](INTERFACES.md) — cross-component contracts
+- Historical (pre-repositioning, contain synthetic demo-arc numbers):
+  `BUILD_ORDER.md`, `DEFINITION_OF_DONE.md`, `PROJECT_KNOWLEDGE_BASE.md`,
+  `TEAM_HANDOFF.md`

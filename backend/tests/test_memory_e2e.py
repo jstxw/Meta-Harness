@@ -11,7 +11,6 @@ Validates the demo beat:
 
 from __future__ import annotations
 
-import asyncio
 import json
 import sys
 import uuid
@@ -31,15 +30,10 @@ from app.meta_harness.memory import (
     search_patterns,
 )
 from app.meta_harness.outer import run_outer_loop
-from app.meta_harness.persistence import healthcheck, persistence_layer
+from app.meta_harness.persistence import persistence_layer
 from app.meta_harness.runs import make_run_dir
 
-_PG_OK = asyncio.get_event_loop_policy().new_event_loop().run_until_complete(healthcheck())
-
-pytestmark = pytest.mark.skipif(
-    not _PG_OK,
-    reason="Postgres not reachable at configured DSN",
-)
+pytestmark = pytest.mark.usefixtures("require_postgres")
 
 
 # ── 1. Cross-run pattern propagation ────────────────────────────────

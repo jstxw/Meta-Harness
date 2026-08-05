@@ -1,5 +1,12 @@
 # DEFINITION_OF_DONE.md — the demo arc as the formal acceptance test
 
+> **HISTORICAL — SUPERSEDED (2026-08-05).** This doc predates the repositioning
+> to a durable execution runtime (see `documents/REPOSITIONING_PLAN.md`).
+> All accuracy figures in it (the 62% -> 80% -> 85% "demo arc", per-iteration
+> scores, score-arc calibration targets) derive from a hardcoded mock-bench
+> fixture: `min(0.95, 0.60 + 0.20 * (iteration - 1))`. They are synthetic
+> constants, not measurements — do not quote them as results.
+
 *A run that satisfies every binary check below is what "done" means.
 This is the authoritative acceptance contract; if the implementation
 disagrees, the implementation is wrong.*

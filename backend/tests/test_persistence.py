@@ -20,18 +20,10 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from app.meta_harness.outer import resume_outer_loop, run_outer_loop  # noqa: E402
-from app.meta_harness.persistence import healthcheck, persistence_layer  # noqa: E402
+from app.meta_harness.persistence import persistence_layer  # noqa: E402
 from app.meta_harness.runs import make_run_dir  # noqa: E402
 
-
-# Module-level skip if Postgres isn't reachable. Each test is async so
-# we can't use a sync conftest hook for the check; do it here instead.
-_PG_OK = asyncio.get_event_loop_policy().new_event_loop().run_until_complete(healthcheck())
-
-pytestmark = pytest.mark.skipif(
-    not _PG_OK,
-    reason="Postgres not reachable at configured DSN; bring up via docker compose",
-)
+pytestmark = pytest.mark.usefixtures("require_postgres")
 
 
 async def test_persistence_layer_setup_idempotent():

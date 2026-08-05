@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
-
 import pytest
 
 from app.streaming import (
@@ -12,15 +10,6 @@ from app.streaming import (
     UnknownEventTypeError,
     channel_for_run,
 )
-
-
-def async_test(fn):
-    """Run an async test body without relying on pytest-asyncio."""
-
-    def _run():
-        return asyncio.run(fn())
-
-    return _run
 
 
 def test_registered_event_types_are_closed_contract():
@@ -52,7 +41,6 @@ def test_unknown_event_type_raises_500_class_error():
     assert excinfo.value.status_code == 500
 
 
-@async_test
 async def test_subscribe_replays_channel_history_as_sse():
     registry = EventRegistry()
     event = registry.emit(

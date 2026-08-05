@@ -1,5 +1,12 @@
 # Meta-Harness — Complete Project Knowledge Base
 
+> **HISTORICAL — SUPERSEDED (2026-08-05).** This doc predates the repositioning
+> to a durable execution runtime (see `documents/REPOSITIONING_PLAN.md`).
+> All accuracy figures in it (the 62% -> 80% -> 85% "demo arc", per-iteration
+> scores, score-arc calibration targets) derive from a hardcoded mock-bench
+> fixture: `min(0.95, 0.60 + 0.20 * (iteration - 1))`. They are synthetic
+> constants, not measurements — do not quote them as results.
+
 > *A single document, deep enough that a teammate who has never seen this repo
 > can read it cover-to-cover and walk into the demo room speaking the system's
 > language. Every claim has either a code excerpt or a file:line reference; no
