@@ -179,6 +179,9 @@ async def test_i1_i3_i5_kill9_worker_midbranch_another_worker_recovers(tmp_path:
         await store._conn.execute(
             "DELETE FROM run_event_seq WHERE run_id = %s;", (run_name,)
         )
+        await store._conn.execute(
+            "DELETE FROM workers WHERE worker_id IN ('worker-a', 'worker-b');"
+        )
         await store.close()
         for stub in (REPO_ROOT / "agents").glob("_mock_iter_*.py"):
             stub.unlink()

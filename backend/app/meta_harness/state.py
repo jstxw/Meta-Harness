@@ -32,7 +32,7 @@ class Candidate:
     cost_usd: float | None = None
 
 
-class MetaHarnessState(TypedDict):
+class MetaHarnessState(TypedDict, total=False):
     """Outer-loop state. ``run_id`` doubles as the parent ``thread_id``."""
 
     run_id: str
@@ -42,6 +42,11 @@ class MetaHarnessState(TypedDict):
     frontier: list[str]
     best_candidate: str | None
     proposer_prior: str
+    # Optional pacing for chaos demos: forks created with
+    # mods={"demo_delay_s": 1.0} sleep this long per iteration, so a
+    # branch lives long enough to kill a worker mid-flight and watch
+    # the lease/fence recovery happen on screen.
+    demo_delay_s: float
 
 
 class CodingAgentState(TypedDict):

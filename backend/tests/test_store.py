@@ -323,6 +323,23 @@ async def test_worker_registry_lifecycle(store_ctx, request):
     assert await store.get_worker(worker_id) is None
 
 
+async def test_worker_reaping_removes_only_stale_rows(store_ctx, request):
+    store, _, expire = store_ctx
+    run_id = _run_id(request)
+    dead = f"{run_id}-dead"
+    live = f"{run_id}-live"
+    await store.register_worker(worker_id=dead, pid=1111, hostname="host-a")
+    await expire(0.3)  # let `dead`'s last_seen age past the cutoff
+    await store.register_worker(worker_id=live, pid=2222, hostname="host-a")
+
+    reaped = await store.reap_stale_workers(older_than_s=0.3)
+    assert dead in reaped
+    assert live not in reaped
+    assert await store.get_worker(dead) is None
+    assert await store.get_worker(live) is not None
+    await store.remove_worker(live)
+
+
 async def test_i7_event_seq_gapless_under_concurrent_appends(store_ctx, request):
     store, _, _ = store_ctx
     run_id = _run_id(request)

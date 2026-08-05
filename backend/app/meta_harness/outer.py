@@ -116,6 +116,9 @@ class OuterLoopRunner:
         state: MetaHarnessState,
         config: RunnableConfig = None,
     ) -> dict[str, Any]:
+        demo_delay = state.get("demo_delay_s") or 0.0
+        if demo_delay > 0:
+            await asyncio.sleep(min(float(demo_delay), 10.0))
         iteration = state["iteration"] + 1
         parent_name = state.get("best_candidate")
         if self.mock_proposer:

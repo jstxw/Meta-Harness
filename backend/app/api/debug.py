@@ -43,11 +43,18 @@ def _pid_alive(pid: int) -> bool:
     return True
 
 
+STALE_WORKER_REAP_S = 600.0
+
+
 @router.get("/debug/workers")
 async def list_workers(request: Request) -> dict[str, Any]:
     if not chaos_enabled():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     store = _store_or_503(request)
+    # Corpses stay visible briefly (they ARE the demo), but rows nobody
+    # has touched in 10 minutes are reaped so the panel doesn't fill
+    # with every worker ever killed.
+    await store.reap_stale_workers(older_than_s=STALE_WORKER_REAP_S)
     hostname = socket.gethostname()
     workers = []
     for row in await store.list_workers():

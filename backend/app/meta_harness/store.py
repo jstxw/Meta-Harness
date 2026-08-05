@@ -197,6 +197,8 @@ class StateStore(Protocol):
 
     async def remove_worker(self, worker_id: str) -> None: ...
 
+    async def reap_stale_workers(self, *, older_than_s: float) -> list[str]: ...
+
     async def list_workers(self) -> list[WorkerRow]: ...
 
     async def get_worker(self, worker_id: str) -> WorkerRow | None: ...
@@ -415,6 +417,13 @@ class InMemoryStateStore:
 
     async def remove_worker(self, worker_id: str) -> None:
         self._workers.pop(worker_id, None)
+
+    async def reap_stale_workers(self, *, older_than_s: float) -> list[str]:
+        cutoff = self._now() - older_than_s
+        stale = [w for w, row in self._workers.items() if row.last_seen < cutoff]
+        for worker_id in stale:
+            del self._workers[worker_id]
+        return stale
 
     async def list_workers(self) -> list[WorkerRow]:
         return sorted(self._workers.values(), key=lambda w: w.started_at)
@@ -822,6 +831,17 @@ class PostgresStateStore:
         await self._conn.execute(
             "DELETE FROM workers WHERE worker_id = %s;", (worker_id,)
         )
+
+    async def reap_stale_workers(self, *, older_than_s: float) -> list[str]:
+        cur = await self._conn.execute(
+            """
+            DELETE FROM workers
+            WHERE last_seen < now() - %(age)s * interval '1 second'
+            RETURNING worker_id;
+            """,
+            {"age": older_than_s},
+        )
+        return [r["worker_id"] for r in await cur.fetchall()]
 
     async def list_workers(self) -> list[WorkerRow]:
         cur = await self._conn.execute("SELECT * FROM workers ORDER BY started_at;")
