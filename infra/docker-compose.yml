@@ -9,6 +9,12 @@
 # The DSN matches .env.example:
 #   POSTGRES_DSN=postgresql://meta_harness:meta_harness@localhost:5432/meta_harness
 
+# Explicit project name: without it, compose derives the project from the
+# directory name ("infra"), which collides with any other repo whose compose
+# file also lives in an infra/ dir — each `up` then recreates the other
+# project's postgres service out from under it.
+name: meta-harness
+
 services:
   postgres:
     image: postgres:16
