@@ -106,7 +106,7 @@ async def test_get_state_history_projects_checkpoints():
     assert history[0].values_summary["budget_remaining"] == 0
 
 
-async def test_worktree_add_creates_branch_and_applies_mods():
+async def test_i4_worktree_add_creates_branch_and_applies_mods():
     graph = _build_graph()
     parent_thread_id = "fork-root"
     await _run_parent(graph, thread_id=parent_thread_id, budget=2)

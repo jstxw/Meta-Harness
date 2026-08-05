@@ -69,7 +69,7 @@ async def test_outer_loop_with_postgres_persistence(tmp_path: Path):
             stub.unlink()
 
 
-async def test_checkpoints_persist_in_postgres(tmp_path: Path):
+async def test_i3_checkpoints_persist_in_postgres(tmp_path: Path):
     """After a run, ``get_state_history`` must return ≥1 checkpoint
     for the run's thread_id."""
     run_dir = make_run_dir(tmp_path, "test-history", fresh=True)
@@ -105,9 +105,10 @@ async def test_checkpoints_persist_in_postgres(tmp_path: Path):
             stub.unlink()
 
 
-async def test_resume_completes_remaining_iterations(tmp_path: Path):
-    """Cancel a run mid-flight; ``resume_outer_loop`` must complete
-    the remaining iterations without duplication."""
+async def test_i1_resume_completes_remaining_iterations_no_duplicates(tmp_path: Path):
+    """I1 (no double execution): cancel a run mid-flight;
+    ``resume_outer_loop`` must complete the remaining iterations
+    without duplication."""
     run_dir = make_run_dir(tmp_path, "test-resume", fresh=True)
     eval_tasks_dir = REPO_ROOT / "eval" / "tasks"
 
