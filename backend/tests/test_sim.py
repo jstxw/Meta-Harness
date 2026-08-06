@@ -33,6 +33,25 @@ def test_simulation_is_deterministic():
     assert a.steps == b.steps
 
 
+def test_replay_export_is_deterministic_and_frame_recording_is_inert():
+    """The exported trace is a pure function of (seed, mode): identical
+    across exports, and recording frames must not change the schedule
+    or the verdict (4.2 depends on both)."""
+    from sim.export import export_seed
+
+    a = export_seed(7, "unfenced_file")
+    b = export_seed(7, "unfenced_file")
+    assert a == b
+    assert a["frames"], "frames must be populated for the viewer"
+    assert any(f["new_violations"] for f in a["frames"]), (
+        "the I1 violation must be attributed to a frame"
+    )
+
+    without_frames = run_seed(7, SimParams(protocol="unfenced_file"))
+    assert without_frames.violations == a["violations"]
+    assert without_frames.steps == a["steps"]
+
+
 def test_dst1_documented_bug_seed_7_unfenced_double_append():
     """Regression pin for DST-1 (docs/INVARIANTS.md): the historical
     unfenced check-then-append protocol double-appends when a stalled

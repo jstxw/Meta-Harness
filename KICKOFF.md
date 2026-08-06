@@ -24,11 +24,11 @@ Read both fully before writing code.
 
 <!-- EDIT THIS BLOCK EACH SESSION. It is the only part that goes stale. -->
 
-- Phases complete: 0, 1, 2, 3, 4.0, 4.1, 4.3, 6 (MCP server + acceptance scenario)
+- Phases complete: 0, 1, 2, 3, 4.0, 4.1, 4.2, 4.3, 5 (landed as Docker-per-trial — see docs/PHASE5_SANDBOX.md), 6 (MCP server + acceptance scenario)
 - In progress: —
-- Remaining: 4.2 seed-replay viewer, 4.4 fork-UI polish (modal exists), Phase 5 wasm sandbox (gated)
+- Remaining: 4.4 fork-UI polish (modal exists), 4.5 sandbox badges in UI (backend field exists), repo rename consideration (plan §7)
 - Suite status (`cd backend && uv run python -m pytest tests -q | tail -1`, 2026-08-06):
-  `123 passed, 1 skipped in 25.46s` (skip = live-LLM test without ANTHROPIC_API_KEY)
+  `128 passed, 1 skipped in 30.69s` (skip = live-LLM test without ANTHROPIC_API_KEY)
 - DST: `cd backend && uv run python -m sim.run --seeds 10000` → 0 failures
   (found bugs documented with seeds in `docs/INVARIANTS.md`: DST-1 seed 7, DST-2 seed 9270)
 

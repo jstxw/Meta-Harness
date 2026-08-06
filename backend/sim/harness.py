@@ -107,6 +107,9 @@ class SimResult:
     violations: list[str] = field(default_factory=list)
     steps: int = 0
     trace: list[str] = field(default_factory=list)
+    # Per-step frames for the replay viewer (populated only when the
+    # simulator runs with record_frames=True — the 10k sweep skips them).
+    frames: list[dict[str, Any]] = field(default_factory=list)
 
     @property
     def ok(self) -> bool:
@@ -152,13 +155,13 @@ class SimWorker:
 
     # ── one scheduling step ──────────────────────────────────────────
 
-    def step(self) -> None:
+    def step(self) -> str | None:
         sim = self.sim
         if self.crashed:
-            return
+            return None
         if self.stalled_until is not None:
             if sim.clock.now() < self.stalled_until:
-                return  # still stalled; only the clock moves
+                return f"{self.worker_id} is stalled"
             self.stalled_until = None
 
         if self.row is None:
@@ -168,7 +171,7 @@ class SimWorker:
                 )
             )
             if row is None:
-                return
+                return f"{self.worker_id} polls: nothing claimable"
             sim.observe(f"{self.worker_id} claimed {row.branch_id} fence={row.lease_generation}")
             self.row = row
             self.fence = row.lease_generation
@@ -180,7 +183,10 @@ class SimWorker:
                 sim.checkpoints[row.thread_id] = self.position
             self.next_hb_due = self.local_now() + sim.params.lease_ttl / 3.0
             self._plan_next_iteration()
-            return
+            return (
+                f"{self.worker_id} CLAIMS {row.branch_id} with fence "
+                f"{row.lease_generation}"
+            )
 
         # Heartbeat when due by the worker's LOCAL clock (skew-sensitive).
         # The real heartbeat is a CONCURRENT task racing the execution
@@ -188,26 +194,30 @@ class SimWorker:
         # the heartbeat that would tell it the fence is stale. The
         # scheduler decides which task wins.
         if self.local_now() >= self.next_hb_due and sim.rng.random() < 0.5:
+            branch_id = self.row.branch_id
             try:
                 _sync(
                     sim.store.heartbeat(
-                        branch_id=self.row.branch_id,
+                        branch_id=branch_id,
                         fence=self.fence,
                         lease_ttl_s=sim.params.lease_ttl,
                     )
                 )
                 self.next_hb_due = self.local_now() + sim.params.lease_ttl / 3.0
+                return f"{self.worker_id} heartbeats {branch_id}"
             except StaleFenceError:
                 sim.observe(f"{self.worker_id} heartbeat fence stale → abort")
                 self._abort()
-            return
+                return (
+                    f"{self.worker_id} heartbeat REJECTED (stale fence) → aborts"
+                )
 
         if not self.micro:
             self._plan_next_iteration()
             if not self.micro:
-                return
+                return None
         op = self.micro.pop(0)
-        getattr(self, f"_op_{op}")()
+        return getattr(self, f"_op_{op}")()
 
     def _plan_next_iteration(self) -> None:
         assert self.row is not None
@@ -220,11 +230,11 @@ class SimWorker:
 
     # ── micro-ops ────────────────────────────────────────────────────
 
-    def _op_record(self) -> None:
+    def _op_record(self) -> str:
         sim = self.sim
         iteration = self.position + 1
         try:
-            _sync(
+            fresh = _sync(
                 sim.store.record_iteration(
                     run_id=self.row.run_id,
                     iteration=iteration,
@@ -238,33 +248,54 @@ class SimWorker:
                     fence=self.fence,
                 )
             )
+            return (
+                f"{self.worker_id} records iter {iteration} (fenced"
+                f"{'' if fresh else ', already recorded — dedup'})"
+            )
         except StaleFenceError:
             sim.observe(f"{self.worker_id} record fence stale → abort")
             self._abort()
+            return (
+                f"{self.worker_id} record iter {iteration} REJECTED "
+                "(stale fence) → aborts"
+            )
 
-    def _op_guarded_append(self) -> None:
+    def _op_guarded_append(self) -> str:
         # The real file append: dedupe-check + write inside ONE sync call
         # with no await between — a single scheduling point here, unlike
         # the historical protocol's separate read/append steps.
-        key = (self.row.branch_id, self.position + 1)
+        iteration = self.position + 1
+        key = (self.row.branch_id, iteration)
         if key not in self.sim.file_log:
             self.sim.file_log.append(key)
+            return f"{self.worker_id} appends iter {iteration} to file (guarded)"
+        return f"{self.worker_id} skips file append (iter {iteration} present)"
 
-    def _op_read_log(self) -> None:
+    def _op_read_log(self) -> str:
         iteration = self.position + 1
         key = (self.row.branch_id, iteration)
         self.pending_iter = iteration
         self.pending_append = key not in self.sim.file_log
+        return (
+            f"{self.worker_id} checks file for iter {iteration}: "
+            f"{'absent — will append' if self.pending_append else 'present'} "
+            "(UNFENCED window opens)"
+        )
 
-    def _op_append_log(self) -> None:
+    def _op_append_log(self) -> str:
         # The historical protocol: nothing revalidates ownership between
         # the read-check and this append.
-        if self.pending_append:
-            self.sim.file_log.append((self.row.branch_id, self.pending_iter))
+        appended = self.pending_append
+        iteration = self.pending_iter
+        if appended:
+            self.sim.file_log.append((self.row.branch_id, iteration))
         self.pending_iter = None
         self.pending_append = False
+        if appended:
+            return f"{self.worker_id} appends iter {iteration} (UNFENCED)"
+        return f"{self.worker_id} skips append (iter {iteration} was present)"
 
-    def _op_emit(self) -> None:
+    def _op_emit(self) -> str:
         sim = self.sim
         event = _sync(
             sim.store.append_event(
@@ -277,18 +308,23 @@ class SimWorker:
             )
         )
         sim.notify_queue.append(event.seq)
+        suffix = ""
         if sim.rng.random() < sim.params.p_dup_notify:
             sim.notify_queue.append(event.seq)  # duplicate delivery
+            suffix = " (NOTIFY duplicated)"
         if len(sim.notify_queue) >= 2 and sim.rng.random() < sim.params.p_delay_notify:
             sim.notify_queue[-1], sim.notify_queue[-2] = (
                 sim.notify_queue[-2],
                 sim.notify_queue[-1],
             )  # out-of-order delivery
+            suffix += " (NOTIFY reordered)"
+        return f"{self.worker_id} emits event seq {event.seq}{suffix}"
 
-    def _op_checkpoint(self) -> None:
+    def _op_checkpoint(self) -> str:
         self.position += 1
         current = self.sim.checkpoints.get(self.row.thread_id, 0) or 0
-        if self.position < current:
+        zombie = self.position < current
+        if zombie:
             # DST finding (seed 9270): LangGraph checkpoint writes are
             # NOT fence-guarded, so a woken zombie worker can append a
             # stale checkpoint after the rightful owner moved on. Benign:
@@ -299,27 +335,46 @@ class SimWorker:
                 f"{current}→{self.position} on {self.row.thread_id}"
             )
         self.sim.checkpoints[self.row.thread_id] = self.position
+        if zombie:
+            return (
+                f"{self.worker_id} ZOMBIE checkpoint {current}→{self.position} "
+                "(unfenced checkpoint write — DST-2)"
+            )
+        return f"{self.worker_id} checkpoints position {self.position}"
 
-    def _op_finish(self) -> None:
+    def _op_finish(self) -> str:
         sim = self.sim
+        branch_id = self.row.branch_id
         try:
             _sync(
                 sim.store.finish_branch(
-                    branch_id=self.row.branch_id,
+                    branch_id=branch_id,
                     fence=self.fence,
                     status="completed",
                     result={"iterations": self.position},
                 )
             )
-            sim.observe(f"{self.worker_id} completed {self.row.branch_id}")
+            sim.observe(f"{self.worker_id} completed {branch_id}")
+            self._abort()
+            return f"{self.worker_id} FINISHES {branch_id} (completed)"
         except StaleFenceError:
             sim.observe(f"{self.worker_id} finish fence stale → abort")
-        self._abort()
+            self._abort()
+            return (
+                f"{self.worker_id} finish {branch_id} REJECTED (stale fence)"
+            )
 
 
 class Simulator:
-    def __init__(self, seed: int, params: SimParams | None = None) -> None:
+    def __init__(
+        self,
+        seed: int,
+        params: SimParams | None = None,
+        *,
+        record_frames: bool = False,
+    ) -> None:
         self.seed = seed
+        self.record_frames = record_frames
         self.params = params or SimParams()
         self.rng = random.Random(seed)
         self.clock = VirtualClock()
@@ -330,6 +385,7 @@ class Simulator:
         self.subscriber_seen: list[int] = []  # seqs the SSE client saw
         self.subscriber_pos = 0  # last seq the client consumed
         self.result = SimResult(seed=seed)
+        self._frame_violations_seen = 0
         self.workers: list[SimWorker] = []
         self._worker_counter = 0
         self._prev_rows: dict[str, Any] = {}
@@ -376,13 +432,14 @@ class Simulator:
 
     # ── faults ───────────────────────────────────────────────────────
 
-    def _inject_fault(self) -> None:
+    def _inject_fault(self) -> str | None:
         roll = self.rng.random()
         live = [w for w in self.workers if not w.crashed]
         if roll < self.params.p_crash and live:
             worker = self.rng.choice(live)
             worker.crashed = True
             self.observe(f"FAULT crash {worker.worker_id}")
+            return f"FAULT: kill -9 {worker.worker_id}"
         elif roll < self.params.p_crash + self.params.p_stall and live:
             worker = self.rng.choice(live)
             duration = self.rng.uniform(
@@ -390,6 +447,7 @@ class Simulator:
             )
             worker.stalled_until = self.clock.now() + duration
             self.observe(f"FAULT stall {worker.worker_id} for {duration:.1f}s")
+            return f"FAULT: {worker.worker_id} stalls for {duration:.1f}s (past its lease)"
         elif roll < self.params.p_crash + self.params.p_stall + self.params.p_cancel:
             candidates = [r for r in self._rows() if r.status not in TERMINAL_STATUSES]
             if candidates:
@@ -409,6 +467,7 @@ class Simulator:
                 )
                 _sync(self.store.request_cancel(row.branch_id))
                 self.observe(f"FAULT cancel {row.branch_id}")
+                return f"FAULT: durable cancel of {row.branch_id} (fence bumped)"
         elif (
             roll
             < self.params.p_crash
@@ -423,6 +482,11 @@ class Simulator:
                 f"{[r.branch_id for r in requeued]}"
             )
             self._check_i2_after_reconcile()
+            return (
+                f"FAULT: boot {worker.worker_id} + reconcile "
+                f"(requeued {[r.branch_id for r in requeued] or 'nothing'})"
+            )
+        return None
 
     # ── invariant monitors ───────────────────────────────────────────
 
@@ -494,6 +558,54 @@ class Simulator:
                         f"({store_frozen}→{count})",
                     )
         self._prev_rows = rows
+
+    def _capture_frame(self, step: int, action: str | None, *, fault: bool) -> None:
+        if not self.record_frames:
+            return
+        new_violations = self.result.violations[self._frame_violations_seen:]
+        self._frame_violations_seen = len(self.result.violations)
+        now = self.clock.now()
+        self.result.frames.append(
+            {
+                "step": step,
+                "t": round(now, 2),
+                "action": action or "…",
+                "fault": fault,
+                "workers": [
+                    {
+                        "id": w.worker_id,
+                        "crashed": w.crashed,
+                        "stalled": (
+                            w.stalled_until is not None and now < w.stalled_until
+                        ),
+                        "skew": round(w.skew, 2),
+                        "branch": w.row.branch_id if w.row else None,
+                        "fence": w.fence if w.row else None,
+                        "position": w.position if w.row else None,
+                    }
+                    for w in self.workers
+                ],
+                "branches": [
+                    {
+                        "id": r.branch_id,
+                        "status": r.status,
+                        "gen": r.lease_generation,
+                        "owner": r.lease_owner,
+                        "lease_expired": (
+                            r.status == "running"
+                            and (
+                                r.lease_expires_at is None
+                                or r.lease_expires_at < now
+                            )
+                        ),
+                    }
+                    for r in self._rows()
+                ],
+                "file_log_len": len(self.file_log),
+                "events": len(_sync(self.store.list_events(run_id=self.run_id))),
+                "new_violations": new_violations,
+            }
+        )
 
     def _drain_subscriber(self) -> None:
         """Model the SSE client: NOTIFY (dup/reordered) only *wakes* it;
@@ -598,11 +710,16 @@ class Simulator:
                     self._spawn_worker()
                 self.observe("drain phase begins")
 
+            label: str | None = None
+            is_fault = False
             action = self.rng.random()
             if fault_phase and action < 0.15:
-                self._inject_fault()
+                label = self._inject_fault()
+                is_fault = label is not None
             elif action < 0.35:
-                self.clock.advance(self.rng.uniform(0.1, params.max_clock_step))
+                delta = self.rng.uniform(0.1, params.max_clock_step)
+                self.clock.advance(delta)
+                label = f"clock advances +{delta:.1f}s"
             else:
                 live = [
                     w
@@ -614,13 +731,19 @@ class Simulator:
                     self.clock.advance(params.lease_ttl + 1)
                     _sync(self.store.reconcile_on_boot())
                     self._check_i2_after_reconcile()
-                    self._spawn_worker()
+                    worker = self._spawn_worker()
+                    self._capture_frame(
+                        steps,
+                        f"fleet dead → boot {worker.worker_id} + reconcile",
+                        fault=True,
+                    )
                     continue
                 worker = self.rng.choice(live)
-                worker.step()
+                label = worker.step()
             if self.rng.random() < 0.5:
                 self._drain_subscriber()
             self._check_step_invariants()
+            self._capture_frame(steps, label, fault=is_fault)
 
         rows = self._rows()
         if not all(r.status in TERMINAL_STATUSES for r in rows):
@@ -631,8 +754,14 @@ class Simulator:
             )
         self.result.steps = steps
         self._final_checks()
+        self._capture_frame(steps + 1, "final invariant checks", fault=False)
         return self.result
 
 
-def run_seed(seed: int, params: SimParams | None = None) -> SimResult:
-    return Simulator(seed, params).run()
+def run_seed(
+    seed: int,
+    params: SimParams | None = None,
+    *,
+    record_frames: bool = False,
+) -> SimResult:
+    return Simulator(seed, params, record_frames=record_frames).run()

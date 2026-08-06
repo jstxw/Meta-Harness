@@ -1,0 +1,19 @@
+{
+  "replays": [
+    {
+      "file": "seed-7-unfenced.json",
+      "label": "seed 7 · unfenced protocol · DST-1: I1 double-append",
+      "note": "The historical check-then-append protocol. A stalled worker wakes past a reclaimed lease and lands a duplicate iteration row."
+    },
+    {
+      "file": "seed-9270-fenced.json",
+      "label": "seed 9270 · fenced protocol · DST-2: zombie checkpoint (benign)",
+      "note": "A woken zombie worker writes one stale trailing checkpoint after the rightful owner completed. Invariants hold; the write is visible at its exact step."
+    },
+    {
+      "file": "seed-42-fenced.json",
+      "label": "seed 42 · fenced protocol · clean run under faults",
+      "note": "Crashes, stalls, cancels and reordered NOTIFYs — all invariants hold."
+    }
+  ]
+}

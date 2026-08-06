@@ -31,7 +31,7 @@ from app.meta_harness import proposer as prp
 from app.meta_harness import runs as runs_mod
 from app.meta_harness.harness import CodingAgentHarness
 from app.meta_harness.inner import run_inner_loop
-from app.meta_harness.sandbox import sandbox_for
+from app.meta_harness.sandbox import sandbox_for, sandbox_mode
 from app.meta_harness.state import MetaHarnessState
 from app.streaming import emit_run_event
 
@@ -376,6 +376,9 @@ class OuterLoopRunner:
             "wall_time_s": wall_time_s,
             "avg_tokens": avg_tokens,
             "_mock_bench": self.mock_bench,
+            # Isolation boundary the trials actually ran under — the UI
+            # and docs must tell the truth about what shipped (4.5).
+            "sandbox": "none (mock-bench)" if self.mock_bench else sandbox_mode(),
         }
         cand_dir = runs_mod.candidate_dir(self.run_dir, candidate["name"])
         (cand_dir / "eval-result.json").write_text(json.dumps(eval_result, indent=2))
