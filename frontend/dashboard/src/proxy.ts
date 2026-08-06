@@ -10,7 +10,7 @@ function hasAuth0Config(): boolean {
   );
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   if (!hasAuth0Config()) {
     return NextResponse.next();
   }
@@ -41,7 +41,10 @@ export const config = {
      * - _next/static  (static assets)
      * - _next/image   (image optimization)
      * - favicon.ico, etc.
+     * - /replay + /replays/* (the seed replay viewer is a public,
+     *   static artifact: pure function of exported DST traces, no
+     *   backend, nothing to protect)
      */
-    "/((?!_next/static|_next/image|images|favicon\\.ico|$).*)",
+    "/((?!_next/static|_next/image|images|favicon\\.ico|replay|replays/|$).*)",
   ],
 };

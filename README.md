@@ -3,28 +3,68 @@
 > *A durable execution runtime for long-horizon agent workflows — checkpointed,
 > forkable, crash-recoverable — verified by deterministic simulation testing.*
 
-LangGraph gives a single thread checkpoint persistence and resume. This
-project adds what it doesn't have: **branch lifecycle as durable state,
-lease-based claiming with fencing tokens across processes, crash
-reconciliation on boot, and fork-from-arbitrary-checkpoint with state
-mutation** — and verifies those mechanics with a seeded, fault-injecting
-simulator instead of hope.
+![tests](https://img.shields.io/badge/tests-128_passed_·_1_skipped-brightgreen)
+![DST](https://img.shields.io/badge/DST-10%2C000_seeds_·_0_failures-brightgreen)
+![invariants](https://img.shields.io/badge/invariants-I1–I7_verified-blue)
+![python](https://img.shields.io/badge/python-3.11%2B-blue)
+![license](https://img.shields.io/badge/license-MIT-lightgrey)
 
-The reference workload is a self-improving coding-agent harness search
-(after the Stanford Meta-Harness paper,
-[arXiv:2603.28052](https://arxiv.org/abs/2603.28052)): an outer LangGraph
-state machine proposes candidate harnesses, benchmarks them in an inner
-state machine, and forks alternative branches from any checkpoint. The
-workload has to *run*; it is not the claim. No benchmark-accuracy numbers
-are claimed anywhere in this repo — the mock benchmark is a deterministic
-fixture and is labeled as such.
+Every badge number is reproducible by a command in this README — that's a house
+rule. Mock-bench scores follow a hardcoded fixture curve and are never presented
+as measurements.
+
+LangGraph gives a single thread checkpoint persistence and resume. This project
+adds what it doesn't have: **branch lifecycle as durable state, lease-based
+claiming with fencing tokens across processes, crash reconciliation on boot,
+and fork-from-arbitrary-checkpoint with state mutation** — and proves those
+mechanics with a seeded, fault-injecting simulator instead of hope.
+
+The reference workload is a self-improving coding-agent harness search (after
+the Stanford Meta-Harness paper,
+[arXiv:2603.28052](https://arxiv.org/abs/2603.28052)). The workload has to
+*run*; it is not the claim.
+
+---
+
+## The 15-second story: kill a worker, keep the run
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as client (MCP / dashboard)
+    participant S as StateStore (Postgres)
+    participant A as worker A
+    participant B as worker B
+    C->>S: fork_from_checkpoint(mods)
+    A->>S: claim branch → fence = 1
+    loop iterate
+        A->>S: fenced record + checkpoint
+    end
+    Note over A: 💀 kill -9
+    Note over S: lease TTL expires
+    B->>S: claim branch → fence = 2
+    A--xS: any late write REJECTED (stale fence 1)
+    B->>S: resume from last checkpoint
+    C->>S: get_branch_status
+    S-->>C: running · lease_generation = 2
+    B->>S: finish(completed) with fence 2
+```
+
+This exact sequence is verified three independent ways:
+
+| Proof | Command |
+|---|---|
+| Real processes, real SIGKILL | `cd backend && uv run pytest tests/test_worker_recovery.py -q` |
+| Driven end-to-end by an outside MCP client | `cd backend && uv run pytest tests/test_mcp_acceptance.py -q` |
+| Watchable live — the dashboard's **chaos tab** has per-worker `kill -9` buttons and a fence badge that ticks gen N → N+1 | `META_HARNESS_CHAOS=1 uv run uvicorn app.main:app` + two `uv run meta-harness worker` |
 
 ---
 
 ## What the runtime guarantees
 
-The spec lives in [`docs/INVARIANTS.md`](docs/INVARIANTS.md); the
-simulator and test suite assert it. In short:
+The spec is [`docs/INVARIANTS.md`](docs/INVARIANTS.md); tests are named after
+the invariant they cover, and the simulator asserts all seven after every
+seeded run.
 
 | ID | Invariant |
 |---|---|
@@ -32,57 +72,137 @@ simulator and test suite assert it. In short:
 | I2 | No orphans — after boot reconciliation, no branch stays `running` without a live lease |
 | I3 | Resume convergence — crash + resume reaches the same final state as an uninterrupted run |
 | I4 | Fork isolation — a branch's writes never mutate parent thread state |
-| I5 | Lease safety — at most one worker executes a branch at a time (fencing tokens, not just leases) |
-| I6 | Durable cancel — a cancelled branch never resumes after restart |
+| I5 | Lease safety — at most one worker executes a branch (fencing tokens, not just TTLs) |
+| I6 | Durable cancel — a cancelled branch never resumes, not even after restart |
 | I7 | Event integrity — per-run SSE sequence numbers are monotonic with no gaps |
+
+Branch lifecycle — every transition outside this diagram is a bug:
+
+```mermaid
+stateDiagram-v2
+    [*] --> created : fork_from_checkpoint
+    created --> running : claim (fence++)
+    created --> cancelled
+    running --> running : reclaim after lease expiry (fence++)
+    running --> created : boot reconciliation requeue
+    running --> completed
+    running --> failed
+    running --> cancelled : durable cancel (fence++)
+    completed --> [*]
+    failed --> [*]
+    cancelled --> [*]
+```
+
+---
+
+## Deterministic simulation testing
+
+A seeded scheduler drives the orchestrator against the real in-memory
+`StateStore` under a **virtual clock**, injecting crashes, stalls past lease
+expiry, cancels, clock skew, and duplicate/reordered NOTIFY delivery — then
+asserts I1–I7. A failure prints its seed; the seed replays the exact
+interleaving.
+
+```bash
+cd backend && uv run python -m sim.run --seeds 10000      # → 10000 seeds run, 0 failed
+```
+
+It found two real bugs (both documented with their seeds in
+[`docs/INVARIANTS.md`](docs/INVARIANTS.md)):
+
+- **DST-1, seed 7** — the historical unfenced check-then-append protocol
+  double-appends when a stalled worker wakes past a reclaimed lease.
+  *Fix shipped:* an atomic, fence-guarded `record_iteration` at the data layer.
+- **DST-2, seed 9270** — a zombie worker lands one stale trailing checkpoint
+  after the rightful owner finishes (LangGraph checkpoint writes are unfenced).
+  Documented benign: terminal branches never resume, requeues re-execute
+  idempotently.
+
+### Replay any seed in the browser
+
+Every DST run is a pure function of its seed, so a trace file *is* the bug
+report. The **`/replay`** page (fully static, no backend) scrubs the timeline:
+amber ticks are injected faults, red ticks are invariant violations, and the
+violation is highlighted at the exact step it surfaces.
+
+Seed 7 mid-run — worker w2 owns branch b1 at fence 1, lease already expired,
+the reclaim is coming:
+
+![replay viewer, seed 7 mid-run](docs/assets/replay-seed7-midrun.png)
+
+…and the end of the same timeline, where the unfenced protocol pays for it:
+
+![replay viewer, seed 7 I1 violation](docs/assets/replay-seed7-violation.png)
+
+```bash
+cd backend && uv run python -m sim.export --seed 4471 --mode fenced_store -o trace.json
+# load trace.json in /replay — the export is byte-identical every time
+```
 
 ---
 
 ## Architecture
 
-```
-   OUTER STATE MACHINE  (4 nodes, checkpointed via AsyncPostgresSaver)
-   ──────────────────────────────────────────────────────────────────
-   propose ──► validate ──► benchmark ──► update_frontier
-      │                          │                │
-      │                          │                └─ loop while budget > 0
-      ▼                          ▼
-   spawns proposer            spawns inner
-   subprocess + SKILL.md      subgraph per candidate
-                                  │
-                                  ▼
-   INNER STATE MACHINE  (5 nodes, sandboxed subgraph per candidate)
-   ────────────────────────────────────────────────────────────────
-   orient ─► plan ─► act ─► verify ─► submit
-                                  │
-                                  ▼  events streamed via SSE (closed set of 11 types)
-   DASHBOARD  (Next.js)
-   ────────────────────
-   ▸ outer state graph (ReactFlow) — nodes light up per iteration
-   ▸ trajectory tree (D3) — branch lineage, fork from any checkpoint
-   ▸ code diff viewer (Monaco) — candidate vs parent
-   ▸ cross-run memory panel — patterns learned by prior runs
+```mermaid
+flowchart LR
+    subgraph clients [" clients "]
+        MC["Claude Code /<br/>any MCP client"]
+        UI["Next.js dashboard<br/>(chaos tab · trajectory tree · /replay)"]
+    end
+    MCPA["MCP adapter<br/>6 tools · zero logic"]
+    API["FastAPI<br/>REST + SSE"]
+    PG[("Postgres<br/>branch_runs · leases + fences<br/>checkpoints · run_events")]
+    W1["worker 1"]
+    WN["worker N"]
+
+    MC -- stdio --> MCPA --> API
+    UI -- "REST + SSE" --> API
+    API --> PG
+    PG -. "LISTEN/NOTIFY (gap-free seq)" .-> API
+    W1 -- "claim · heartbeat · fenced writes" --> PG
+    WN -- "claim · heartbeat · fenced writes" --> PG
 ```
 
-Durability mechanics (branch lifecycle table, lease claiming with
-fencing tokens, boot reconciliation, worker/API process split, SSE over
-Postgres LISTEN/NOTIFY) are being landed per
-[`documents/REPOSITIONING_PLAN.md`](documents/REPOSITIONING_PLAN.md);
-current phase status is tracked honestly in
-[`docs/PROJECT_STATUS.md`](docs/PROJECT_STATUS.md).
+- **Workers are separate processes** from the API. They claim `branch_runs`
+  rows with `FOR UPDATE SKIP LOCKED` + a lease TTL; every claim increments
+  `lease_generation` (the fencing token) and every write carries it — a stale
+  fence is rejected by the data layer itself.
+- **Events cross the process boundary durably**: a per-run event log with
+  gap-free monotonic sequence numbers, fanned out via `LISTEN/NOTIFY`; the SSE
+  `id:` is the sequence number, so `Last-Event-ID` reconnects survive API
+  restarts (I7).
+- **The workload runs inside it**: two LangGraph state machines (outer
+  propose→validate→benchmark→update_frontier, inner
+  orient→plan→act→verify→submit), 6 fixed tools, 11 override points,
+  cross-run memory.
+
+---
+
+## Consume it as a service (MCP)
+
+Six tools — `start_run`, `fork_from_checkpoint`, `get_branch_status`,
+`list_branches`, `cancel_branch`, `resume_run` — as a thin stdio adapter over
+the REST API. One implementation of the branch lifecycle, no parallel logic.
+`.mcp.json` registers it for Claude Code, or:
+
+```bash
+claude mcp add meta-harness -- uv --directory backend run meta-harness-mcp
+```
+
+The acceptance scenario — a client with **no knowledge of this repo** starts a
+run, forks a mid-point checkpoint, survives its worker being `kill -9`'d, and
+reads the fence increment off its next poll — is automated:
+
+```bash
+cd backend && uv run pytest tests/test_mcp_acceptance.py -q   # 1 passed, ~13s, 4 processes
+```
 
 ---
 
 ## Quickstart
 
-**Prerequisites**
-
-- Python 3.11+ and [uv](https://github.com/astral-sh/uv)
-- Docker (for local Postgres)
-- Node.js 20+ + npm (for the dashboard, optional)
-- An Anthropic API key only for live-LLM paths (everything below runs without one)
-
-**Get running**
+Prerequisites: Python 3.11+ with [uv](https://github.com/astral-sh/uv), Docker,
+Node 20+ (dashboard only). No API key needed for anything below.
 
 ```bash
 git clone https://github.com/jstxw/Meta-Harness.git
@@ -91,135 +211,68 @@ cp .env.example .env
 uv sync
 docker compose -f infra/docker-compose.yml up -d postgres
 
-# Backend test suite (live LLM test skips without ANTHROPIC_API_KEY)
-cd backend && uv run pytest tests -q
-# → 92 passed, 1 skipped
+# the suite (live-LLM test skips without ANTHROPIC_API_KEY)
+cd backend && uv run pytest tests -q          # → 128 passed, 1 skipped
 
-# Full outer loop with the deterministic mock proposer + mock benchmark
+# a full durable run with the deterministic mock workload
 uv run meta-harness loop --proposer mock --mock-bench --budget 2 --fresh
 
-# Kill it mid-run, then resume from the last Postgres checkpoint
+# kill it mid-run, resume from the last Postgres checkpoint
 uv run meta-harness resume <run-name>
+cat ../runs/<run-name>/evolution_summary.jsonl | jq -r .iteration | sort | uniq -d   # empty (I1)
 
-# No duplicate iterations across the crash/resume sequence (I1):
-cat ../runs/<run-name>/evolution_summary.jsonl | jq -r .iteration | sort | uniq -d   # empty
+# the chaos demo
+META_HARNESS_CHAOS=1 uv run uvicorn app.main:app &   # API
+uv run meta-harness worker &                          # worker(s)
+cd ../frontend/dashboard && npm install && npm run dev   # dashboard → chaos tab
 ```
 
-Every number quoted in this repo is reproducible by a command printed
-next to it. Mock-bench scores follow a hardcoded fixture curve and are
-never presented as measurements.
+### Trial isolation (Phase 5)
 
----
+Two sandbox modes for workload trials, recorded in every `eval-result.json`:
 
-## Consume it as a service (MCP)
-
-The runtime is exposed to any MCP client as six tools (`start_run`,
-`fork_from_checkpoint`, `get_branch_status`, `list_branches`,
-`cancel_branch`, `resume_run`) via a thin stdio adapter over the REST
-API — one implementation of the branch lifecycle, no parallel logic.
-`.mcp.json` registers it for Claude Code; or manually:
+| Mode | Boundary |
+|---|---|
+| `subprocess` (default) | fresh temp dir, rlimits — same trust boundary as the host, labeled honestly |
+| `META_HARNESS_SANDBOX=docker` | one container per trial: `--network none`, 512MB, 1 CPU, workspace bind mount |
 
 ```bash
-claude mcp add meta-harness -- uv --directory backend run meta-harness-mcp
+docker build -t meta-harness-sandbox -f infra/sandbox.Dockerfile infra
+cd backend && uv run pytest tests/test_sandbox_docker.py -q   # 4 passed
 ```
 
-The acceptance scenario — an MCP client with no knowledge of this repo
-starts a run, forks a mid-point checkpoint, the owning worker is
-`kill -9`'d, and the client's next poll shows the branch running again
-with an incremented `lease_generation` — is automated:
-
-```bash
-cd backend && uv run pytest tests/test_mcp_acceptance.py -q   # 1 passed
-```
-
----
-
-## What's distinctive about this implementation
-
-1. **Durability is the product, not a feature flag.** Branch lifecycle,
-   leases, fencing tokens, and boot reconciliation are first-class
-   durable state — not in-process dicts that die with the process.
-2. **Deterministic simulation testing.** A seeded scheduler drives the
-   orchestrator against an in-memory state store with a virtual clock
-   and fault injection (crash, lease expiry, stall, clock skew,
-   duplicate delivery). Failures replay from their seed.
-3. **Two LangGraph state machines.** The outer machine evolves the inner
-   machine's source code; both are checkpointed; forks are concurrent
-   (`asyncio.create_task`, independently cancellable) and grow on the
-   dashboard at once.
-4. **A closed SSE contract.** Eleven event types, registry-enforced;
-   unknown types are a 500, not a silent new feature.
-5. **The inner loop has a fixed contract and an evolvable shape.** Six
-   tools are the contract with the evaluator and cannot be modified by
-   candidates; eleven override points define the search space.
-6. **Cross-run memory persists across runs.** A pattern learned in run A
-   flows into run B's proposer system prompt.
-
----
-
-## Repository layout
-
-```
-meta-harness/
-├── backend/                                   # FastAPI + LangGraph
-│   ├── app/
-│   │   ├── cli.py                             # `meta-harness` CLI (typer)
-│   │   ├── main.py                            # FastAPI app entry
-│   │   ├── streaming.py                       # closed-set SSE event registry
-│   │   ├── api/                               # REST routers
-│   │   └── meta_harness/                      # internal namespace
-│   │       ├── outer.py                       # outer 4-node StateGraph
-│   │       ├── inner.py                       # inner 5-phase StateGraph
-│   │       ├── state.py                       # MetaHarnessState + CodingAgentState
-│   │       ├── harness.py                     # CodingAgentHarness (11 override points)
-│   │       ├── proposer.py                    # claude_propose + mock_propose
-│   │       ├── tools.py                       # 6 fixed inner-loop tools
-│   │       ├── sandbox.py                     # per-task sandbox dirs
-│   │       ├── frontier.py                    # Pareto on (accuracy × tokens)
-│   │       ├── persistence.py                 # AsyncPostgresSaver
-│   │       ├── runs.py                        # filesystem lifecycle
-│   │       ├── memory.py                      # cross-run patterns
-│   │       └── branches.py                    # forks + trajectory
-│   └── tests/                                 # backend pytest suite
-├── frontend/                                  # Next.js dashboard
-├── sdk/meta_harness/                          # public Python library
-├── skills/meta-harness-coding-agent/SKILL.md  # the proposer's workflow
-├── eval/                                      # 5 search tasks + 2 holdout + scorer
-├── agents/                                    # baseline + generated candidates
-├── infra/docker-compose.yml                   # postgres:16 service
-├── documents/REPOSITIONING_PLAN.md            # the active plan — read first
-└── docs/                                      # INVARIANTS.md, PROJECT_STATUS.md, contracts
-```
+Why Docker and not wasmtime: the spike write-up is
+[`docs/PHASE5_SANDBOX.md`](docs/PHASE5_SANDBOX.md) — WASI has no
+subprocess/shell and the frozen tool contract includes `run_bash`.
 
 ---
 
 ## Documentation
 
-| Doc | When to read |
+| Doc | What it is |
 |---|---|
-| [`documents/REPOSITIONING_PLAN.md`](documents/REPOSITIONING_PLAN.md) | First — the active plan and framing |
-| [`docs/INVARIANTS.md`](docs/INVARIANTS.md) | The spec: invariants I1–I7 + branch state machine |
-| [`docs/PROJECT_STATUS.md`](docs/PROJECT_STATUS.md) | Current verified state, with reproduction commands |
-| [`docs/INTERFACES.md`](docs/INTERFACES.md) | Every cross-component contract |
-| `docs/BUILD_ORDER.md`, `docs/DEFINITION_OF_DONE.md`, `docs/PROJECT_KNOWLEDGE_BASE.md`, `docs/TEAM_HANDOFF.md` | Historical (pre-repositioning); contain synthetic demo-arc numbers — do not quote them as results |
-| [`relay_metaharness_v7.md`](relay_metaharness_v7.md) + appendices | The original design docs for the workload |
+| [`documents/REPOSITIONING_PLAN.md`](documents/REPOSITIONING_PLAN.md) | The plan this repo executes — phases, non-goals, honesty rules |
+| [`docs/INVARIANTS.md`](docs/INVARIANTS.md) | The spec: I1–I7, state machine, fencing-token analysis, DST findings |
+| [`documents/MCP_SERVER_SPEC.md`](documents/MCP_SERVER_SPEC.md) | Phase 6 expanded: the MCP surface and acceptance scenario |
+| [`docs/PROJECT_STATUS.md`](docs/PROJECT_STATUS.md) | Current verified state — every number with its reproduction command |
+| [`docs/PHASE5_SANDBOX.md`](docs/PHASE5_SANDBOX.md) | The wasm spike and the Docker outcome |
+| [`KICKOFF.md`](KICKOFF.md) | Session kickoff prompt for agent-driven development |
+
+Historical design docs (`docs/BUILD_ORDER.md`, `docs/DEFINITION_OF_DONE.md`,
+`docs/PROJECT_KNOWLEDGE_BASE.md`, `docs/TEAM_HANDOFF.md`) predate the
+repositioning and contain synthetic demo-arc numbers — do not quote them as
+results.
 
 ---
 
 ## Acknowledgments
 
-Built on, and grateful for, the work of:
-
-- Yoonho Lee, Roshen Nair, Qizheng Zhang, Kangwook Lee, Omar Khattab,
-  and Chelsea Finn — *Meta-Harness: End-to-End Optimization of Model
-  Harnesses*, [arXiv:2603.28052](https://arxiv.org/abs/2603.28052),
-  [project page](https://yoonholee.com/meta-harness/).
-- The LangChain team for LangGraph's checkpointing and time-travel
-  primitives.
-- Anthropic for the Claude Code CLI's `--append-system-prompt` and
-  stream-json output, used by the real proposer path.
-
----
+- Yoonho Lee, Roshen Nair, Qizheng Zhang, Kangwook Lee, Omar Khattab, and
+  Chelsea Finn — *Meta-Harness: End-to-End Optimization of Model Harnesses*,
+  [arXiv:2603.28052](https://arxiv.org/abs/2603.28052).
+- The LangChain team for LangGraph's checkpointing and time-travel primitives.
+- Martin Kleppmann's fencing-token argument, which the simulator re-derived
+  the hard way at seed 7.
 
 ## License
 

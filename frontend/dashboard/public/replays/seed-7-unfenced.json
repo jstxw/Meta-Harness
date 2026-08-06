@@ -1,0 +1,6598 @@
+{
+ "seed": 7,
+ "mode": "unfenced_file",
+ "params": {
+  "n_workers": 2,
+  "n_branches": 2,
+  "branch_iters": 5,
+  "lease_ttl": 10.0,
+  "protocol": "unfenced_file",
+  "p_crash": 0.02,
+  "p_stall": 0.04,
+  "p_cancel": 0.02,
+  "p_boot": 0.05,
+  "p_dup_notify": 0.1,
+  "p_delay_notify": 0.1,
+  "max_clock_step": 4.0,
+  "step_limit": 4000
+ },
+ "ok": false,
+ "steps": 136,
+ "violations": [
+  "I1: duplicate iteration rows: [('b1', 4)]"
+ ],
+ "frames": [
+  {
+   "step": 1,
+   "t": 0.0,
+   "action": "\u2026",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "created",
+     "gen": 0,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "created",
+     "gen": 0,
+     "owner": null,
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 0,
+   "events": 0,
+   "new_violations": []
+  },
+  {
+   "step": 2,
+   "t": 0.0,
+   "action": "\u2026",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "created",
+     "gen": 0,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "created",
+     "gen": 0,
+     "owner": null,
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 0,
+   "events": 0,
+   "new_violations": []
+  },
+  {
+   "step": 3,
+   "t": 0.0,
+   "action": "w1 CLAIMS b0 with fence 1",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 0
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "created",
+     "gen": 0,
+     "owner": null,
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 0,
+   "events": 0,
+   "new_violations": []
+  },
+  {
+   "step": 4,
+   "t": 0.0,
+   "action": "w1 checks file for iter 1: absent \u2014 will append (UNFENCED window opens)",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 0
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "created",
+     "gen": 0,
+     "owner": null,
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 0,
+   "events": 0,
+   "new_violations": []
+  },
+  {
+   "step": 5,
+   "t": 0.0,
+   "action": "\u2026",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 0
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "created",
+     "gen": 0,
+     "owner": null,
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 0,
+   "events": 0,
+   "new_violations": []
+  },
+  {
+   "step": 6,
+   "t": 0.0,
+   "action": "w2 CLAIMS b1 with fence 1",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 0
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 0
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 0,
+   "events": 0,
+   "new_violations": []
+  },
+  {
+   "step": 7,
+   "t": 2.27,
+   "action": "clock advances +2.3s",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 0
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 0
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 0,
+   "events": 0,
+   "new_violations": []
+  },
+  {
+   "step": 8,
+   "t": 2.27,
+   "action": "w1 appends iter 1 (UNFENCED)",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 0
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 0
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 1,
+   "events": 0,
+   "new_violations": []
+  },
+  {
+   "step": 9,
+   "t": 2.27,
+   "action": "w1 emits event seq 1",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 0
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 0
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 1,
+   "events": 1,
+   "new_violations": []
+  },
+  {
+   "step": 10,
+   "t": 2.75,
+   "action": "clock advances +0.5s",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 0
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 0
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 1,
+   "events": 1,
+   "new_violations": []
+  },
+  {
+   "step": 11,
+   "t": 2.75,
+   "action": "w1 checkpoints position 1",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 1
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 0
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 1,
+   "events": 1,
+   "new_violations": []
+  },
+  {
+   "step": 12,
+   "t": 2.75,
+   "action": "w2 checks file for iter 1: absent \u2014 will append (UNFENCED window opens)",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 1
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 0
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 1,
+   "events": 1,
+   "new_violations": []
+  },
+  {
+   "step": 13,
+   "t": 2.75,
+   "action": "w2 appends iter 1 (UNFENCED)",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 1
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 0
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 2,
+   "events": 1,
+   "new_violations": []
+  },
+  {
+   "step": 14,
+   "t": 2.75,
+   "action": "w1 checks file for iter 2: absent \u2014 will append (UNFENCED window opens)",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 1
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 0
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 2,
+   "events": 1,
+   "new_violations": []
+  },
+  {
+   "step": 15,
+   "t": 4.78,
+   "action": "clock advances +2.0s",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 1
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 0
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 2,
+   "events": 1,
+   "new_violations": []
+  },
+  {
+   "step": 16,
+   "t": 4.78,
+   "action": "w1 heartbeats b0",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 1
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 0
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 2,
+   "events": 1,
+   "new_violations": []
+  },
+  {
+   "step": 17,
+   "t": 4.78,
+   "action": "w1 appends iter 2 (UNFENCED)",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 1
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 0
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 3,
+   "events": 1,
+   "new_violations": []
+  },
+  {
+   "step": 18,
+   "t": 4.78,
+   "action": "w1 emits event seq 2",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 1
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 0
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 3,
+   "events": 2,
+   "new_violations": []
+  },
+  {
+   "step": 19,
+   "t": 4.78,
+   "action": "w2 heartbeats b1",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 1
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 0
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 3,
+   "events": 2,
+   "new_violations": []
+  },
+  {
+   "step": 20,
+   "t": 4.78,
+   "action": "w2 emits event seq 3 (NOTIFY duplicated) (NOTIFY reordered)",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 1
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 0
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 3,
+   "events": 3,
+   "new_violations": []
+  },
+  {
+   "step": 21,
+   "t": 4.78,
+   "action": "w1 checkpoints position 2",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 2
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 0
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 3,
+   "events": 3,
+   "new_violations": []
+  },
+  {
+   "step": 22,
+   "t": 4.78,
+   "action": "w2 checkpoints position 1",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 2
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 1
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 3,
+   "events": 3,
+   "new_violations": []
+  },
+  {
+   "step": 23,
+   "t": 4.78,
+   "action": "w2 checks file for iter 2: absent \u2014 will append (UNFENCED window opens)",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 2
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 1
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 3,
+   "events": 3,
+   "new_violations": []
+  },
+  {
+   "step": 24,
+   "t": 4.78,
+   "action": "w1 checks file for iter 3: absent \u2014 will append (UNFENCED window opens)",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 2
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 1
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 3,
+   "events": 3,
+   "new_violations": []
+  },
+  {
+   "step": 25,
+   "t": 4.78,
+   "action": "w1 appends iter 3 (UNFENCED)",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 2
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 1
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 4,
+   "events": 3,
+   "new_violations": []
+  },
+  {
+   "step": 26,
+   "t": 4.78,
+   "action": "\u2026",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 2
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 1
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 4,
+   "events": 3,
+   "new_violations": []
+  },
+  {
+   "step": 27,
+   "t": 4.78,
+   "action": "w1 emits event seq 4",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 2
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 1
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 4,
+   "events": 4,
+   "new_violations": []
+  },
+  {
+   "step": 28,
+   "t": 5.42,
+   "action": "clock advances +0.6s",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 2
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 1
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 4,
+   "events": 4,
+   "new_violations": []
+  },
+  {
+   "step": 29,
+   "t": 5.42,
+   "action": "w2 appends iter 2 (UNFENCED)",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 2
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 1
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 5,
+   "events": 4,
+   "new_violations": []
+  },
+  {
+   "step": 30,
+   "t": 5.42,
+   "action": "w2 emits event seq 5",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 2
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 1
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 5,
+   "events": 5,
+   "new_violations": []
+  },
+  {
+   "step": 31,
+   "t": 6.42,
+   "action": "clock advances +1.0s",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 2
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 1
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 5,
+   "events": 5,
+   "new_violations": []
+  },
+  {
+   "step": 32,
+   "t": 6.42,
+   "action": "w1 checkpoints position 3",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 3
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 1
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 5,
+   "events": 5,
+   "new_violations": []
+  },
+  {
+   "step": 33,
+   "t": 6.42,
+   "action": "\u2026",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 3
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 1
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 5,
+   "events": 5,
+   "new_violations": []
+  },
+  {
+   "step": 34,
+   "t": 6.42,
+   "action": "w1 checks file for iter 4: absent \u2014 will append (UNFENCED window opens)",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 3
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 1
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 5,
+   "events": 5,
+   "new_violations": []
+  },
+  {
+   "step": 35,
+   "t": 6.42,
+   "action": "w1 appends iter 4 (UNFENCED)",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 3
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 1
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 6,
+   "events": 5,
+   "new_violations": []
+  },
+  {
+   "step": 36,
+   "t": 6.42,
+   "action": "w2 checkpoints position 2",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 3
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 2
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 6,
+   "events": 5,
+   "new_violations": []
+  },
+  {
+   "step": 37,
+   "t": 6.42,
+   "action": "w2 checks file for iter 3: absent \u2014 will append (UNFENCED window opens)",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 3
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 2
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "running",
+     "gen": 1,
+     "owner": "w1",
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 6,
+   "events": 5,
+   "new_violations": []
+  },
+  {
+   "step": 38,
+   "t": 6.42,
+   "action": "FAULT: durable cancel of b0 (fence bumped)",
+   "fault": true,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 3
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 2
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 6,
+   "events": 5,
+   "new_violations": []
+  },
+  {
+   "step": 39,
+   "t": 6.42,
+   "action": "\u2026",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 3
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 2
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 6,
+   "events": 5,
+   "new_violations": []
+  },
+  {
+   "step": 40,
+   "t": 6.42,
+   "action": "w1 emits event seq 6",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 3
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 2
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 6,
+   "events": 6,
+   "new_violations": []
+  },
+  {
+   "step": 41,
+   "t": 6.42,
+   "action": "\u2026",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 3
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 2
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 6,
+   "events": 6,
+   "new_violations": []
+  },
+  {
+   "step": 42,
+   "t": 6.42,
+   "action": "w2 appends iter 3 (UNFENCED)",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 3
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 2
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 7,
+   "events": 6,
+   "new_violations": []
+  },
+  {
+   "step": 43,
+   "t": 6.42,
+   "action": "w1 checkpoints position 4",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 2
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 7,
+   "events": 6,
+   "new_violations": []
+  },
+  {
+   "step": 44,
+   "t": 6.42,
+   "action": "w2 emits event seq 7",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 2
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 7,
+   "events": 7,
+   "new_violations": []
+  },
+  {
+   "step": 45,
+   "t": 6.42,
+   "action": "\u2026",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 2
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 7,
+   "events": 7,
+   "new_violations": []
+  },
+  {
+   "step": 46,
+   "t": 6.42,
+   "action": "w1 checks file for iter 5: absent \u2014 will append (UNFENCED window opens)",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 2
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 7,
+   "events": 7,
+   "new_violations": []
+  },
+  {
+   "step": 47,
+   "t": 10.23,
+   "action": "clock advances +3.8s",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 2
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 7,
+   "events": 7,
+   "new_violations": []
+  },
+  {
+   "step": 48,
+   "t": 10.23,
+   "action": "w1 appends iter 5 (UNFENCED)",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 2
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 8,
+   "events": 7,
+   "new_violations": []
+  },
+  {
+   "step": 49,
+   "t": 10.23,
+   "action": "w1 emits event seq 8",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 2
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 8,
+   "events": 8,
+   "new_violations": []
+  },
+  {
+   "step": 50,
+   "t": 13.34,
+   "action": "clock advances +3.1s",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 2
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 8,
+   "events": 8,
+   "new_violations": []
+  },
+  {
+   "step": 51,
+   "t": 13.34,
+   "action": "w2 checkpoints position 3",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 3
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 8,
+   "events": 8,
+   "new_violations": []
+  },
+  {
+   "step": 52,
+   "t": 13.34,
+   "action": "w1 checkpoints position 5",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b0",
+     "fence": 1,
+     "position": 5
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 3
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 8,
+   "events": 8,
+   "new_violations": []
+  },
+  {
+   "step": 53,
+   "t": 13.34,
+   "action": "w1 heartbeat REJECTED (stale fence) \u2192 aborts",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 3
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 8,
+   "events": 8,
+   "new_violations": []
+  },
+  {
+   "step": 54,
+   "t": 13.34,
+   "action": "w1 polls: nothing claimable",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 3
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 8,
+   "events": 8,
+   "new_violations": []
+  },
+  {
+   "step": 55,
+   "t": 13.34,
+   "action": "w1 polls: nothing claimable",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 3
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 8,
+   "events": 8,
+   "new_violations": []
+  },
+  {
+   "step": 56,
+   "t": 13.34,
+   "action": "w2 checks file for iter 4: absent \u2014 will append (UNFENCED window opens)",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 3
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 8,
+   "events": 8,
+   "new_violations": []
+  },
+  {
+   "step": 57,
+   "t": 17.24,
+   "action": "clock advances +3.9s",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 3
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": true
+    }
+   ],
+   "file_log_len": 8,
+   "events": 8,
+   "new_violations": []
+  },
+  {
+   "step": 58,
+   "t": 17.24,
+   "action": "\u2026",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 3
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 1,
+     "owner": "w2",
+     "lease_expired": true
+    }
+   ],
+   "file_log_len": 8,
+   "events": 8,
+   "new_violations": []
+  },
+  {
+   "step": 59,
+   "t": 17.24,
+   "action": "w1 CLAIMS b1 with fence 2",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 2,
+     "position": 3
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 3
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 2,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 8,
+   "events": 8,
+   "new_violations": []
+  },
+  {
+   "step": 60,
+   "t": 17.24,
+   "action": "w1 checks file for iter 4: absent \u2014 will append (UNFENCED window opens)",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 2,
+     "position": 3
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 3
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 2,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 8,
+   "events": 8,
+   "new_violations": []
+  },
+  {
+   "step": 61,
+   "t": 17.24,
+   "action": "\u2026",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 2,
+     "position": 3
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 3
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 2,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 8,
+   "events": 8,
+   "new_violations": []
+  },
+  {
+   "step": 62,
+   "t": 20.81,
+   "action": "clock advances +3.6s",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 2,
+     "position": 3
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 3
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 2,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 8,
+   "events": 8,
+   "new_violations": []
+  },
+  {
+   "step": 63,
+   "t": 20.81,
+   "action": "w1 appends iter 4 (UNFENCED)",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 2,
+     "position": 3
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 3
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 2,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 9,
+   "events": 8,
+   "new_violations": []
+  },
+  {
+   "step": 64,
+   "t": 20.81,
+   "action": "w2 appends iter 4 (UNFENCED)",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 2,
+     "position": 3
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 3
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 2,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 8,
+   "new_violations": []
+  },
+  {
+   "step": 65,
+   "t": 24.78,
+   "action": "clock advances +4.0s",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 2,
+     "position": 3
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 3
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 2,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 8,
+   "new_violations": []
+  },
+  {
+   "step": 66,
+   "t": 24.78,
+   "action": "w2 emits event seq 9",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 2,
+     "position": 3
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 1,
+     "position": 3
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 2,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 9,
+   "new_violations": []
+  },
+  {
+   "step": 67,
+   "t": 24.78,
+   "action": "w2 heartbeat REJECTED (stale fence) \u2192 aborts",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 2,
+     "position": 3
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 2,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 9,
+   "new_violations": []
+  },
+  {
+   "step": 68,
+   "t": 24.78,
+   "action": "\u2026",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 2,
+     "position": 3
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 2,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 9,
+   "new_violations": []
+  },
+  {
+   "step": 69,
+   "t": 24.78,
+   "action": "\u2026",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 2,
+     "position": 3
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 2,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 9,
+   "new_violations": []
+  },
+  {
+   "step": 70,
+   "t": 24.78,
+   "action": "w1 emits event seq 10",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 2,
+     "position": 3
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 2,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 10,
+   "new_violations": []
+  },
+  {
+   "step": 71,
+   "t": 25.82,
+   "action": "clock advances +1.0s",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 2,
+     "position": 3
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 2,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 10,
+   "new_violations": []
+  },
+  {
+   "step": 72,
+   "t": 27.56,
+   "action": "clock advances +1.7s",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 2,
+     "position": 3
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 2,
+     "owner": "w1",
+     "lease_expired": true
+    }
+   ],
+   "file_log_len": 10,
+   "events": 10,
+   "new_violations": []
+  },
+  {
+   "step": 73,
+   "t": 27.56,
+   "action": "w2 CLAIMS b1 with fence 3",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 2,
+     "position": 3
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 3
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 3,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 10,
+   "new_violations": []
+  },
+  {
+   "step": 74,
+   "t": 27.56,
+   "action": "w2 checks file for iter 4: present (UNFENCED window opens)",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 2,
+     "position": 3
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 3
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 3,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 10,
+   "new_violations": []
+  },
+  {
+   "step": 75,
+   "t": 27.56,
+   "action": "w1 checkpoints position 4",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 2,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 3
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 3,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 10,
+   "new_violations": []
+  },
+  {
+   "step": 76,
+   "t": 27.56,
+   "action": "\u2026",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 2,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 3
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 3,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 10,
+   "new_violations": []
+  },
+  {
+   "step": 77,
+   "t": 27.56,
+   "action": "\u2026",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 2,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 3
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 3,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 10,
+   "new_violations": []
+  },
+  {
+   "step": 78,
+   "t": 27.56,
+   "action": "w1 checks file for iter 5: absent \u2014 will append (UNFENCED window opens)",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 2,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 3
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 3,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 10,
+   "new_violations": []
+  },
+  {
+   "step": 79,
+   "t": 27.56,
+   "action": "w2 skips append (iter 4 was present)",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 2,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 3
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 3,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 10,
+   "new_violations": []
+  },
+  {
+   "step": 80,
+   "t": 27.56,
+   "action": "\u2026",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 2,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 3
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 3,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 10,
+   "new_violations": []
+  },
+  {
+   "step": 81,
+   "t": 30.67,
+   "action": "clock advances +3.1s",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 2,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 3
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 3,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 10,
+   "new_violations": []
+  },
+  {
+   "step": 82,
+   "t": 30.67,
+   "action": "w1 heartbeat REJECTED (stale fence) \u2192 aborts",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 3
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 3,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 10,
+   "new_violations": []
+  },
+  {
+   "step": 83,
+   "t": 30.67,
+   "action": "w1 polls: nothing claimable",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 3
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 3,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 10,
+   "new_violations": []
+  },
+  {
+   "step": 84,
+   "t": 30.67,
+   "action": "w2 emits event seq 11",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 3
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 3,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 85,
+   "t": 30.67,
+   "action": "w2 checkpoints position 4",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 4
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 3,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 86,
+   "t": 30.67,
+   "action": "w1 polls: nothing claimable",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 4
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 3,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 87,
+   "t": 30.67,
+   "action": "FAULT: boot w3 + reconcile (requeued nothing)",
+   "fault": true,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 4
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 3,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 88,
+   "t": 30.67,
+   "action": "\u2026",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 4
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 3,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 89,
+   "t": 30.67,
+   "action": "w1 polls: nothing claimable",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 4
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 3,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 90,
+   "t": 33.56,
+   "action": "clock advances +2.9s",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 4
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 3,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 91,
+   "t": 33.56,
+   "action": "\u2026",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 4
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 3,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 92,
+   "t": 37.38,
+   "action": "clock advances +3.8s",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 4
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 3,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 93,
+   "t": 37.38,
+   "action": "w3 polls: nothing claimable",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 4
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 3,
+     "owner": "w2",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 94,
+   "t": 39.16,
+   "action": "clock advances +1.8s",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 4
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 3,
+     "owner": "w2",
+     "lease_expired": true
+    }
+   ],
+   "file_log_len": 10,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 95,
+   "t": 40.02,
+   "action": "clock advances +0.9s",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 4
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 3,
+     "owner": "w2",
+     "lease_expired": true
+    }
+   ],
+   "file_log_len": 10,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 96,
+   "t": 40.02,
+   "action": "w1 CLAIMS b1 with fence 4",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 4
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 97,
+   "t": 40.02,
+   "action": "w3 polls: nothing claimable",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 4
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 98,
+   "t": 42.56,
+   "action": "clock advances +2.5s",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 4
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 99,
+   "t": 42.56,
+   "action": "\u2026",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 4
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 100,
+   "t": 42.56,
+   "action": "w1 checks file for iter 5: absent \u2014 will append (UNFENCED window opens)",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 4
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 101,
+   "t": 46.19,
+   "action": "clock advances +3.6s",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 4
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 102,
+   "t": 46.19,
+   "action": "w2 checks file for iter 5: absent \u2014 will append (UNFENCED window opens)",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": "b1",
+     "fence": 3,
+     "position": 4
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 103,
+   "t": 46.19,
+   "action": "w2 heartbeat REJECTED (stale fence) \u2192 aborts",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 104,
+   "t": 46.19,
+   "action": "w3 polls: nothing claimable",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 105,
+   "t": 49.41,
+   "action": "clock advances +3.2s",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 106,
+   "t": 49.41,
+   "action": "w2 polls: nothing claimable",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 107,
+   "t": 49.41,
+   "action": "w2 polls: nothing claimable",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 108,
+   "t": 49.41,
+   "action": "w1 heartbeats b1",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 109,
+   "t": 49.41,
+   "action": "\u2026",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 110,
+   "t": 49.41,
+   "action": "w3 polls: nothing claimable",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 10,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 111,
+   "t": 49.41,
+   "action": "w1 appends iter 5 (UNFENCED)",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 11,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 112,
+   "t": 49.41,
+   "action": "w2 polls: nothing claimable",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 11,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 113,
+   "t": 50.72,
+   "action": "clock advances +1.3s",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 11,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 114,
+   "t": 50.72,
+   "action": "w2 polls: nothing claimable",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 11,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 115,
+   "t": 50.72,
+   "action": "w2 polls: nothing claimable",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 11,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 116,
+   "t": 50.72,
+   "action": "\u2026",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 11,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 117,
+   "t": 50.72,
+   "action": "w3 polls: nothing claimable",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 11,
+   "events": 11,
+   "new_violations": []
+  },
+  {
+   "step": 118,
+   "t": 50.72,
+   "action": "w1 emits event seq 12",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 11,
+   "events": 12,
+   "new_violations": []
+  },
+  {
+   "step": 119,
+   "t": 50.72,
+   "action": "w2 polls: nothing claimable",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 11,
+   "events": 12,
+   "new_violations": []
+  },
+  {
+   "step": 120,
+   "t": 50.72,
+   "action": "w2 polls: nothing claimable",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 11,
+   "events": 12,
+   "new_violations": []
+  },
+  {
+   "step": 121,
+   "t": 51.66,
+   "action": "clock advances +0.9s",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 11,
+   "events": 12,
+   "new_violations": []
+  },
+  {
+   "step": 122,
+   "t": 55.2,
+   "action": "clock advances +3.5s",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 11,
+   "events": 12,
+   "new_violations": []
+  },
+  {
+   "step": 123,
+   "t": 55.2,
+   "action": "\u2026",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 11,
+   "events": 12,
+   "new_violations": []
+  },
+  {
+   "step": 124,
+   "t": 55.2,
+   "action": "w1 heartbeats b1",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 11,
+   "events": 12,
+   "new_violations": []
+  },
+  {
+   "step": 125,
+   "t": 55.94,
+   "action": "clock advances +0.7s",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 11,
+   "events": 12,
+   "new_violations": []
+  },
+  {
+   "step": 126,
+   "t": 55.94,
+   "action": "w3 polls: nothing claimable",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 11,
+   "events": 12,
+   "new_violations": []
+  },
+  {
+   "step": 127,
+   "t": 56.98,
+   "action": "clock advances +1.0s",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 4
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 11,
+   "events": 12,
+   "new_violations": []
+  },
+  {
+   "step": 128,
+   "t": 56.98,
+   "action": "w1 checkpoints position 5",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 5
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 11,
+   "events": 12,
+   "new_violations": []
+  },
+  {
+   "step": 129,
+   "t": 56.98,
+   "action": "\u2026",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 5
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 11,
+   "events": 12,
+   "new_violations": []
+  },
+  {
+   "step": 130,
+   "t": 56.98,
+   "action": "w2 polls: nothing claimable",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 5
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 11,
+   "events": 12,
+   "new_violations": []
+  },
+  {
+   "step": 131,
+   "t": 56.98,
+   "action": "w2 polls: nothing claimable",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 5
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 11,
+   "events": 12,
+   "new_violations": []
+  },
+  {
+   "step": 132,
+   "t": 58.39,
+   "action": "clock advances +1.4s",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 5
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 11,
+   "events": 12,
+   "new_violations": []
+  },
+  {
+   "step": 133,
+   "t": 61.05,
+   "action": "clock advances +2.7s",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 5
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 11,
+   "events": 12,
+   "new_violations": []
+  },
+  {
+   "step": 134,
+   "t": 61.05,
+   "action": "w1 heartbeats b1",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": "b1",
+     "fence": 4,
+     "position": 5
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "running",
+     "gen": 4,
+     "owner": "w1",
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 11,
+   "events": 12,
+   "new_violations": []
+  },
+  {
+   "step": 135,
+   "t": 61.05,
+   "action": "w1 FINISHES b1 (completed)",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "completed",
+     "gen": 4,
+     "owner": null,
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 11,
+   "events": 12,
+   "new_violations": []
+  },
+  {
+   "step": 137,
+   "t": 61.05,
+   "action": "final invariant checks",
+   "fault": false,
+   "workers": [
+    {
+     "id": "w1",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w2",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.3,
+     "branch": null,
+     "fence": null,
+     "position": null
+    },
+    {
+     "id": "w3",
+     "crashed": false,
+     "stalled": false,
+     "skew": 0.0,
+     "branch": null,
+     "fence": null,
+     "position": null
+    }
+   ],
+   "branches": [
+    {
+     "id": "b0",
+     "status": "cancelled",
+     "gen": 2,
+     "owner": null,
+     "lease_expired": false
+    },
+    {
+     "id": "b1",
+     "status": "completed",
+     "gen": 4,
+     "owner": null,
+     "lease_expired": false
+    }
+   ],
+   "file_log_len": 11,
+   "events": 12,
+   "new_violations": [
+    "I1: duplicate iteration rows: [('b1', 4)]"
+   ]
+  }
+ ]
+}
